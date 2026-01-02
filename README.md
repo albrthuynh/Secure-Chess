@@ -42,39 +42,41 @@ Secure Chess is a production-style real-time chess platform: a high-performance 
 
 ## Repository Structure
 
-knightshield/
-  README.md
-  docs/
-    architecture.md
-    threat-model.md
-    perf-report.md
-  proto/
-    gamecontrol.proto
-  services/
-    api/                      # FastAPI + gRPC server (Python)
-      app/
-      tests/
-      Dockerfile
-      pyproject.toml
-    gameserver/               # C++ WebSocket server + gRPC client
-      src/
-      include/
-      tests/
-      Dockerfile
-      CMakeLists.txt
-  client/                        # Next.js frontend
-    src/
-    package.json
-    Dockerfile
-  infra/
-    docker-compose.yml
-    grafana/
-    prometheus/
-  scripts/
-    dev.sh
-    lint.sh
-    generate_protos.sh
-  loadtests/
-    websocket/                # k6 / custom load harness
-    api/
+```
+Secure-Chess/
+├── README.md
+├── docs/
+│   ├── architecture.md
+│   ├── threat-model.md
+│   └── perf-report.md
+├── proto/
+│   └── gamecontrol.proto
+├── services/
+│   ├── api/                      # FastAPI + gRPC server (Python)
+│   │   ├── app/
+│   │   ├── tests/
+│   │   ├── Dockerfile
+│   │   └── pyproject.toml
+│   └── gameserver/               # C++ WebSocket server + gRPC client
+│       ├── src/
+│       ├── include/
+│       ├── tests/
+│       ├── Dockerfile
+│       └── CMakeLists.txt
+├── client/                        # Next.js frontend
+│   ├── src/
+│   ├── package.json
+│   └── Dockerfile
+├── infra/
+│   ├── docker-compose.yml
+│   ├── grafana/
+│   └── prometheus/
+├── scripts/
+│   ├── dev.sh
+│   ├── lint.sh
+│   └── generate_protos.sh
+└── loadtests/
+    ├── websocket/                # k6 / custom load harness
+    └── api/
+```
 
