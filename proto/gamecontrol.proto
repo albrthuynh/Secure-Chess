@@ -1,3 +1,23 @@
 // This is the .proto file
 // I lowkey don't understand this yet, all I know is that it is supposed to be the "contract."
 // Shared service-to-service API lives in here
+
+// documentation: https://protobuf.dev/getting-started/cpptutorial/
+
+// start with an edition declaration
+edition = "2026";
+
+package gamecontrol;
+
+message Player {
+  string id = 1;
+  string username = 2;
+  int rating = 3;
+}
+
+message Game {
+  string whitePlayerId = 1;
+  string blackPlayerId = 2;
+  int whitePlayerRating = 3;
+  int blackPlayerRating = 4;
+}
