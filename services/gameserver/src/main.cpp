@@ -4,6 +4,14 @@
 #include <iostream>
 
 int main(int argc, char** argv) {
-    std::cout << "Hello World!";
-    return 0;
+  try {
+    Config config = Config::FromEnv(argc, argv);
+    Server server(config);
+    server.run();
+  } catch (const std::exception& e) {
+    std::cerr << "Fatal Error: " << e.what() << std::endl;
+    return 1;
+  }
+
+  return 0;
 }

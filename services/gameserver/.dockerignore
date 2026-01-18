@@ -1,0 +1,10 @@
+build/
+CMakeCache.txt
+CMakeFiles/
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+.DS_Store
+
