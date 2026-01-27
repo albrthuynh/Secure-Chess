@@ -42,6 +42,7 @@ Secure Chess is a production-style real-time chess platform: a high-performance 
 
 ## Repository Structure
 
+```
 knightshield/
   README.md
   docs/
@@ -77,4 +78,4 @@ knightshield/
   loadtests/
     websocket/                # k6 / custom load harness
     api/
-
+```
