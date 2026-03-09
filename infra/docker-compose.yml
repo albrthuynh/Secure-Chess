@@ -1,0 +1,17 @@
+version: "0.01"
+
+services:
+  client:
+    build: ../frontend/
+    ports:
+      - "3000:3000"
+
+  api-server:
+    build: ../services/api/
+    ports:
+      - "8000:8000"
+
+  gameserver:
+    build: ../services/gameserver/
+    ports:
+      - "9001:9001"
