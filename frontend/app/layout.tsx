@@ -1,7 +1,10 @@
 // app/layout.tsx
 
-import NavBar from "./navbar/navbar";
+import NavBar from "./navbar/Navbar";
+import SignupPage from "./authN/SignupPage";
+import LoginPage from "./authN/LoginPage";
 import "./globals.css";
+
 
 export const metadata: Metadata = {
   title: "Secure Chess",
