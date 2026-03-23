@@ -5,13 +5,23 @@ services:
     build: ../frontend/
     ports:
       - "3000:3000"
-
   api-server:
     build: ../services/api/
     ports:
       - "8000:8000"
-
   gameserver:
     build: ../services/gameserver/
     ports:
       - "9001:9001"
+  database:
+    image: postgres:13
+    container_name: postgres_db
+    environment:
+      
+    ports:
+      - 5432:5432
+  redis:
+    image: redis:7-alpine
+    container_name: redis_rl
+    ports:
+      -6379:6379

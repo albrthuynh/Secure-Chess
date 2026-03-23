@@ -10,6 +10,12 @@
 ### Week 1
 
 - [ ] FastAPI: signup/login, access JWT + refresh token rotation
+    - [ ] Set up Redis + Postgres services to docker-compose
+    - [ ] set up Postgres table
+        - [ ] users (id, username/email, password_hash, created_at)
+        - [ ] refresh_tokens (id, user_id, token_hash, expires_at, revoked_at, created_at)
+    - [ ] Implement manual JWT flow
+    - [ ] Figure out what the "backend" is, connect frontend to backend
 - [ ] Postgres schema: users, matches, games, audit_logs
 - [ ] Redis rate limiting for auth endpoints
 - [ ] Deliverable: working auth endpoints + migrations.
