@@ -1,5 +1,7 @@
 .venv/
 .env*
+!.env.example
+!**/.env.example
 DS_Store
 __pycache__
 
@@ -13,4 +15,3 @@ cmake-build-*/
 *.exe
 *.a
 *.so
-

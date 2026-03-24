@@ -5,8 +5,22 @@
 id: uuid,
 username: string,
 email: string,
+passwordHash: string,
 createdAt: UTC timestamp,
+refreshToken: (refresh token id)
 ```
+
+### Refresh Tokens
+
+```
+tokenId: uuid,
+userId: uuid (user id),
+expirationDate: UTC timestamp,
+revokedDate: UTC timestamp,
+createdAt: UTC timestamp,
+
+```
+
 
 ### Games
 
