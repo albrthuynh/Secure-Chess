@@ -1,3 +1,8 @@
+
+# running the service 
+# docker compose --env-file infra/.env -f infra/docker-compose.yml up -d
+# docker compose --env-file infra/.env -f infra/docker-compose.yml down
+
 services:
   client:
     build: ../frontend/

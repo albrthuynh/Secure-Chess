@@ -1,6 +1,7 @@
 fastapi
 fastapi[standard]
 uvicorn[standard]
-"passlib[bcrypt]"
+passlib[bcrypt]
+psycopg[binary]
 pyjwt
 python-multipart
