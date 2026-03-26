@@ -17,7 +17,7 @@
 refresh_time: int,
     - [ ] Implement manual JWT flow
     - [ ] Figure out what the "backend" is, connect frontend to backend
-- [ ] Postgres schema: users, matches, games, audit_logs
+- [ ] Postgres schema: users, matches, games, audit_logs (in progress)
 - [ ] Redis rate limiting for auth endpoints
 - [ ] Deliverable: working auth endpoints + migrations.
 
