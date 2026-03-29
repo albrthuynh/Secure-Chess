@@ -3,6 +3,7 @@ import os
 import uuid
 from datetime import datetime, timezone, timedelta
 import jwt
+from jwt.exceptions import InvalidTokenError
 from fastapi import HTTPException
 
 JWT_ALGO = os.getenv("ALGO_SECRET")
@@ -30,16 +31,54 @@ def create_access_token(user_id: str) -> str:
     PAYLOAD = {
         "sub": user_id,
         "type": "access",
-        "iat": int(curr_datetime.timestamp()),
-        "exp": int((curr_datetime + timedelta(JWT_MINS)).timestamp()),
+        "iat": int(curr_datetime.timestamp()),  # issued_at
+        "exp": int((curr_datetime + timedelta(JWT_MINS)).timestamp()),  # expired on
     }
 
     return jwt.encode(PAYLOAD, JWT_SECRET, algorithm=JWT_ALGO)
 
 
-def create_refresh_token():
-    """ """
+def create_refresh_token(user_id: str) -> tuple[str, str, datetime]:
+    """
+    1. create id for refresh token
+    2. set expiration date for token
+    """
+    if not JWT_SECRET:
+        raise RuntimeError("JWT Secret is missing")
+
+    token_id = str(uuid.uuid4())
+    curr_datetime = _utc_now()
+    expiration_date = curr_datetime + timedelta(days=JWT_DAYS)
+
+    PAYLOAD = {
+        "jti": token_id,  # JWT id
+        "sub": user_id,
+        "iat": int(curr_datetime.timestamp()),
+        "exp": int(expiration_date.timestamp()),
+        "type": "refresh",
+    }
+
+    encoded_token = jwt.encode(PAYLOAD, JWT_SECRET, algorithm=JWT_ALGO)
+    return (encoded_token, token_id, expiration_date)
 
 
-def decode_token():
-    """ """
+def decode_token(token: str, token_type: str) -> dict:
+    """
+    1. know the secret
+    2. use that secret to decode the token
+    """
+
+    if not JWT_SECRET:
+        raise RuntimeError("JWT Secret is missing")
+
+    try:
+        decoded_token = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGO])
+    except jwt.ExpiredSignatureError 
+        raise HTTPException(401, "Token Expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(401, "Invalid Token")
+
+    if token_type != decoded_token.get("type"):
+        raise HTTPException(401, "Unexpected token type")
+
+    return decoded_token
