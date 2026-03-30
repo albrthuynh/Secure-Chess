@@ -6,10 +6,10 @@ import jwt
 from jwt.exceptions import InvalidTokenError
 from fastapi import HTTPException
 
-JWT_ALGO = os.getenv("ALGO_SECRET")
-JWT_SECRET = os.getenv("SECRET_JWT")
-JWT_MINS = int(os.getenv("ACCESS_TOKEN_MINS"))
-JWT_DAYS = int(os.getenv("ACCESS_TOKEN_DAYS"))
+JWT_ALGO = os.getenv("JWT_ALGORITHM", "HS256")
+JWT_SECRET = os.getenv("JWT_SECRET", "")
+JWT_MINS = int(os.getenv("ACCESS_TOKEN_MINS", "15"))
+JWT_DAYS = int(os.getenv("REFRESH_TOKEN_DAYS", "7"))
 
 
 def _utc_now() -> datetime:
@@ -32,7 +32,7 @@ def create_access_token(user_id: str) -> str:
         "sub": user_id,
         "type": "access",
         "iat": int(curr_datetime.timestamp()),  # issued_at
-        "exp": int((curr_datetime + timedelta(JWT_MINS)).timestamp()),  # expired on
+        "exp": int((curr_datetime + timedelta(minutes=JWT_MINS)).timestamp()),  # expired on
     }
 
     return jwt.encode(PAYLOAD, JWT_SECRET, algorithm=JWT_ALGO)
@@ -45,6 +45,8 @@ def create_refresh_token(user_id: str) -> tuple[str, str, datetime]:
     """
     if not JWT_SECRET:
         raise RuntimeError("JWT Secret is missing")
+    if not JWT_ALGO:
+        raise RuntimeError("JWT ALGO is missing")
 
     token_id = str(uuid.uuid4())
     curr_datetime = _utc_now()
@@ -70,10 +72,12 @@ def decode_token(token: str, token_type: str) -> dict:
 
     if not JWT_SECRET:
         raise RuntimeError("JWT Secret is missing")
+    if not JWT_ALGO:
+        raise RuntimeError("JWT ALGO is missing")
 
     try:
         decoded_token = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGO])
-    except jwt.ExpiredSignatureError 
+    except jwt.ExpiredSignatureError:
         raise HTTPException(401, "Token Expired")
     except jwt.InvalidTokenError:
         raise HTTPException(401, "Invalid Token")
