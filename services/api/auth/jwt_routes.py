@@ -32,6 +32,10 @@ class RefreshBody(BaseModel):
     refresh_token: str
 
 
+class LogoutBody(BaseModel):
+    refresh_token: str
+
+
 @router.get("/health")
 def health():
     return {"ok": True}
@@ -190,3 +194,32 @@ def refresh(body: RefreshBody):
         "refresh_token": new_refresh_token,
         "token_type": "bearer",
     }
+
+
+@router.post("/logout")
+def logout(body: LogoutBody):
+    try:
+        # we decode to see if the token has been tampered with, if it has then it would return a 401 error
+        decoded_token = decode_token(token=body.refresh_token, token_type="refresh")
+    except:
+        pass  # make logout idempotent
+
+    refresh_token_hash = hashlib.sha256(body.refresh_token.encode("utf-8")).hexdigest()
+
+    # update the refresh tokens (revoke it)
+    try:
+        with psycopg.connect(DATABASE_URL) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                        UPDATE refresh_tokens
+                        SET revoked_date = NOW()
+                        WHERE token_hash = %s
+                    """,
+                    (refresh_token_hash,),
+                )
+            conn.commit()
+    except psycopg.Error:
+        raise HTTPException(status_code=500, detail="Failed to revoke token")
+
+    return {"message": "Logged out successfully"}
