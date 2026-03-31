@@ -9,14 +9,14 @@
 
 ### Week 1
 
-- [ ] FastAPI: signup/login, access JWT + refresh token rotation
+- [x] FastAPI: signup/login, access JWT + refresh token rotation
     - [x] Set up Redis + Postgres services to docker-compose
     - [x] set up Postgres table
         - [x] users (id, username/email, password_hash, created_at)
         - [x] refresh_tokens (id, user_id, token_hash, expires_at, revoked_at, created_at)
 refresh_time: int,
     - [x] Implement manual JWT flow
-- [ ] Postgres schema: users, matches, games, audit_logs (in progress)
+- [x] Postgres schema: users, matches, games, audit_logs (in progress)
 - [ ] Redis rate limiting for auth endpoints
 - [ ] Deliverable: working auth endpoints + migrations.
 
