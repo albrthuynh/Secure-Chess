@@ -10,7 +10,7 @@ from fastapi import Request, HTTPException
 from redis.asyncio import Redis
 from functools import wraps
 import time
-from ..utils.redis_client import get_redis_client
+from utils.redis_client import get_redis_client
 
 
 def get_client_ip(request: Request) -> str:
@@ -53,7 +53,7 @@ async def check_rate_limit(
 
         return (current, remaining_requests, reset_time)
     except Exception as e:
-        print(f"⚠️  Unable to check the rate limiting in Redis: {e}")
+        print(f"Unable to check the rate limiting in Redis: {e}")
         return (0, max_requests, int(time.time()) + window_seconds)
 
 
@@ -92,7 +92,7 @@ def rate_limit(
                     raise ValueError("Body was not able to be found")
 
                 try:
-                    from ..auth.jwt_helpers import decode_token
+                    from auth.jwt_helpers import decode_token
 
                     decoded_token = decode_token(
                         body.refresh_token, token_type="refresh"

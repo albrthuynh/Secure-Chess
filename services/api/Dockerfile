@@ -9,7 +9,7 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copying the source code
-COPY main.py ./main.py
+COPY . . 
 EXPOSE 8000 
 
 # Creates a new user named app in the container

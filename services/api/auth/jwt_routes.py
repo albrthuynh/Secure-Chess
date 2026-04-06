@@ -2,17 +2,17 @@ import hashlib
 import os
 
 import psycopg
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from passlib.context import CryptContext
 from psycopg.errors import UniqueViolation
 from pydantic import BaseModel, EmailStr
 from .jwt_helpers import create_access_token, create_refresh_token, decode_token
+from middleware.rate_limit import rate_limit
 
 router = APIRouter(prefix="/auth", tags=["/auth"])
 
-pwd_context = CryptContext(
-    schemes=["bcrypt"], deprecated="auto"
-)  # I need this line explained
+# I need this line explained
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
@@ -42,7 +42,8 @@ async def health():
 
 
 @router.post("/sign-up", status_code=201)
-async def signup(body: SignupBody):
+@rate_limit(max_requests=3, window_seconds=3600, identifier_type="ip", key_prefix="sign-up")
+async def signup(body: SignupBody, request: Request):
     # make sure there is a password policy here
     if len(body.password) < 6:
         raise HTTPException(
@@ -67,7 +68,8 @@ async def signup(body: SignupBody):
                 row = cur.fetchone()
             conn.commit()
     except UniqueViolation:
-        raise HTTPException(status_code=409, detail="Username or email already exists")
+        raise HTTPException(
+            status_code=409, detail="Username or email already exists")
 
     return {
         "user_id": str(row[0]),
@@ -78,7 +80,8 @@ async def signup(body: SignupBody):
 
 
 @router.post("/sign-in", status_code=200)
-async def signin(body: SignInBody):
+@rate_limit(max_requests=5, window_seconds=900, identifier_type="ip", key_prefix="sign-in")
+async def signin(body: SignInBody, request: Request):
     if not body.username or not body.password:
         raise HTTPException(status_code=400, detail="Missing information")
 
@@ -107,7 +110,8 @@ async def signin(body: SignInBody):
     refresh_token, refresh_token_id, expiration_date = create_refresh_token(
         str(user_id)
     )
-    refresh_token_hash = hashlib.sha256(refresh_token.encode("utf-8")).hexdigest()
+    refresh_token_hash = hashlib.sha256(
+        refresh_token.encode("utf-8")).hexdigest()
     # insert refresh token into db to make sure that resources can be accessed securely once a user is logged in
     try:
         with psycopg.connect(DATABASE_URL) as conn:
@@ -121,7 +125,8 @@ async def signin(body: SignInBody):
                 )
                 conn.commit()
     except psycopg.Error:
-        raise HTTPException(status_code=500, detail="Failed to persist refresh token")
+        raise HTTPException(
+            status_code=500, detail="Failed to persist refresh token")
 
     return {
         "Sign In Successful": True,
@@ -134,14 +139,16 @@ async def signin(body: SignInBody):
 
 
 @router.post("/refresh")
-async def refresh(body: RefreshBody):
+@rate_limit(max_requests=20, window_seconds=60, identifier_type="user_id", key_prefix="refresh")
+async def refresh(body: RefreshBody, request: Request):
     decoded_token = decode_token(body.refresh_token, token_type="refresh")
 
     sub = decoded_token["sub"]
     jti = decoded_token["jti"]
 
     # rehash the token in order to find the old one
-    rehashed_token = hashlib.sha256(body.refresh_token.encode("utf-8")).hexdigest()
+    rehashed_token = hashlib.sha256(
+        body.refresh_token.encode("utf-8")).hexdigest()
 
     try:
         with psycopg.connect(DATABASE_URL) as conn:
@@ -171,7 +178,8 @@ async def refresh(body: RefreshBody):
 
                 # issuing new token
                 new_access_token = create_access_token(sub)
-                new_refresh_token, new_jti, new_exp_date = create_refresh_token(sub)
+                new_refresh_token, new_jti, new_exp_date = create_refresh_token(
+                    sub)
                 new_refresh_token_hash = hashlib.sha256(
                     new_refresh_token.encode("utf-8")
                 ).hexdigest()
@@ -197,14 +205,17 @@ async def refresh(body: RefreshBody):
 
 
 @router.post("/logout")
-async def logout(body: LogoutBody):
+@rate_limit(max_requests=20, window_seconds=60, identifier_type="ip", key_prefix="logout")
+async def logout(body: LogoutBody, request: Request):
     try:
         # we decode to see if the token has been tampered with, if it has then it would return a 401 error
-        decoded_token = decode_token(token=body.refresh_token, token_type="refresh")
+        decoded_token = decode_token(
+            token=body.refresh_token, token_type="refresh")
     except:
         pass  # make logout idempotent
 
-    refresh_token_hash = hashlib.sha256(body.refresh_token.encode("utf-8")).hexdigest()
+    refresh_token_hash = hashlib.sha256(
+        body.refresh_token.encode("utf-8")).hexdigest()
 
     # update the refresh tokens (revoke it)
     try:
