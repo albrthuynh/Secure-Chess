@@ -17,8 +17,8 @@
 refresh_time: int,
     - [x] Implement manual JWT flow
 - [x] Postgres schema: users, matches, games, audit_logs (in progress)
-- [ ] Redis rate limiting for auth endpoints
-- [ ] Deliverable: working auth endpoints + migrations.
+- [x] Redis rate limiting for auth endpoints
+- [x] Deliverable: working auth endpoints + migrations.
 
 
 ### Week 2: Matchmaking + join ticket flow
@@ -27,3 +27,12 @@ refresh_time: int,
 - [ ] Create match in Postgres
 - [ ] Issue short-lived match ticket
 - [ ] Deliverable: client can request match and receive {ws_url, ticket, match_id}.
+
+### Week 3: C++ WebSocket server MVP (real-time core)
+
+- [ ] WS server accepts connections
+- [ ] Basic protocol: join match, send move message
+- [ ] Minimal move validation (start with library or simple checks; upgrade later)
+- [ ] Basic room state + broadcast
+- [ ] Deliverable: two clients can play a game end-to-end locally.
+
