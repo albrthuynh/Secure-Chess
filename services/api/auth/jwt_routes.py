@@ -37,12 +37,12 @@ class LogoutBody(BaseModel):
 
 
 @router.get("/health")
-def health():
+async def health():
     return {"ok": True}
 
 
 @router.post("/sign-up", status_code=201)
-def signup(body: SignupBody):
+async def signup(body: SignupBody):
     # make sure there is a password policy here
     if len(body.password) < 6:
         raise HTTPException(
@@ -78,7 +78,7 @@ def signup(body: SignupBody):
 
 
 @router.post("/sign-in", status_code=200)
-def signin(body: SignInBody):
+async def signin(body: SignInBody):
     if not body.username or not body.password:
         raise HTTPException(status_code=400, detail="Missing information")
 
@@ -134,7 +134,7 @@ def signin(body: SignInBody):
 
 
 @router.post("/refresh")
-def refresh(body: RefreshBody):
+async def refresh(body: RefreshBody):
     decoded_token = decode_token(body.refresh_token, token_type="refresh")
 
     sub = decoded_token["sub"]
@@ -197,7 +197,7 @@ def refresh(body: RefreshBody):
 
 
 @router.post("/logout")
-def logout(body: LogoutBody):
+async def logout(body: LogoutBody):
     try:
         # we decode to see if the token has been tampered with, if it has then it would return a 401 error
         decoded_token = decode_token(token=body.refresh_token, token_type="refresh")
