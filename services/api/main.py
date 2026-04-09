@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 from auth.jwt_routes import router as auth_router
+from matchmaking.routes import router as matchmaking_router
 from utils.redis_client import close_redis_connection, get_redis_client
 from fastapi import FastAPI
 
@@ -19,6 +20,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(auth_router)
+app.include_router(matchmaking_router)
 
 
 @app.get("/")
