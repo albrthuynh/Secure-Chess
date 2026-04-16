@@ -3,6 +3,7 @@ from auth.jwt_helpers import decode_token
 
 
 def get_user_id(request: Request) -> str:
+    # coming from an HTTP request, this grabs the headers, one of which is Authorization, containing the <jwt>
     auth_header = request.headers.get("Authorization")
     if auth_header is None:
         raise HTTPException(status_code=401, detail="Authorization Header not found")

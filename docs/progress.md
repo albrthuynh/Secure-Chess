@@ -24,7 +24,7 @@ refresh_time: int,
 ### Week 2: Matchmaking + join ticket flow
 
 - [x] Matchmaking request endpoint → queue in Redis
-- [ ] Create match in Postgres
+- [x] Create match in Postgres
 - [ ] Issue short-lived match ticket
 - [ ] Deliverable: client can request match and receive {ws_url, ticket, match_id}.
 
