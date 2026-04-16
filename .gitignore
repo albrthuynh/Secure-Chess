@@ -6,6 +6,7 @@ venv/
 !**/.env.example
 DS_Store
 __pycache__
+.git
 
 # Build directories
 build/
