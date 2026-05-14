@@ -32,7 +32,9 @@ def create_access_token(user_id: str) -> str:
         "sub": user_id,
         "type": "access",
         "iat": int(curr_datetime.timestamp()),  # issued_at
-        "exp": int((curr_datetime + timedelta(minutes=JWT_MINS)).timestamp()),  # expired on
+        "exp": int(
+            (curr_datetime + timedelta(minutes=JWT_MINS)).timestamp()
+        ),  # expired on
     }
 
     return jwt.encode(PAYLOAD, JWT_SECRET, algorithm=JWT_ALGO)
@@ -84,5 +86,28 @@ def decode_token(token: str, token_type: str) -> dict:
 
     if token_type != decoded_token.get("type"):
         raise HTTPException(401, "Unexpected token type")
-
     return decoded_token
+
+
+def create_match_ticket(user_id: str, match_id: str) -> str:
+    """
+    Generate a ticket that lives for around ~60 seconds, this is necessary because we want to know that a player is allowed into the match.
+    (Like a movie ticket right, you need a ticket to have access to the movie you wanna watch, without it you are not authorized to go into the movie)
+    ticket = signed json web token which will later be signed by the websocket server
+    """
+    if not JWT_SECRET:
+        raise RuntimeError("JWT SECRET is Missing")
+
+    token_id = str(uuid.uuid4())
+    curr_datetime = _utc_now()
+
+    PAYLOAD = {
+        "jti": token_id,
+        "sub": user_id,
+        "match_id": match_id,
+        "iat": int(curr_datetime.timestamp()),
+        "exp": int((curr_datetime + timedelta(seconds=60)).timestamp()),
+        "type": "match_ticket",
+    }
+
+    return jwt.encode(PAYLOAD, JWT_SECRET, algorithm=JWT_ALGO)

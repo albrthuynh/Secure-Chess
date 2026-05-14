@@ -1,4 +1,5 @@
 import json
+import os
 import uuid
 from datetime import datetime, timezone
 
@@ -6,8 +7,11 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from .matchmaking_helpers import GameDetails, create_match
+from auth.jwt_helpers import create_match_ticket
 from utils.user_helpers import get_user_id
 from utils.redis_client import get_redis_client
+
+WS_BASE_URL = os.getenv("WS_BASE_URL", "ws://localhost:8080")
 
 router = APIRouter(prefix="/matchmaking", tags=["/matchmaking"])
 
@@ -88,13 +92,25 @@ async def create_request(body: MatchmakingRequestBody, request: Request):
     )
 
     match = create_match(game_details)
+    match_id = match["match_id"]
+
+    # issue the ticket for the requesting user
+    match_ticket = create_match_ticket(user_id, match_id)
+
+    # the other user needs a match ticket too b/c they are queued up, we gonna give it to them later
+    # right now we will store it in redis, so later we can poll and grab it (probably will just end up implement polling)
+    other_user_id = p2["user_id"] if p1["user_id"] == user_id else p1["user_id"]
+    other_ticket = create_match_ticket(other_user_id, match_id)
+    await redis_client.set(f"mm:ticket:{other_user_id}", other_ticket, ex=90)
 
     return {
         "queued": False,
         "match_found": True,
-        "match_id": match["match_id"],
+        "match_id": match_id,
         "white_user_id": match["white_user_id"],
         "black_user_id": match["black_user_id"],
         "time_control": match["time_control"],
         "increment": match["increment"],
+        "ticket": match_ticket,
+        "ws_url": f"{WS_BASE_URL}/game/{match_id}",
     }

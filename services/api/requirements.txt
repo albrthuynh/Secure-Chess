@@ -2,7 +2,10 @@ fastapi
 fastapi[standard]
 uvicorn[standard]
 passlib[bcrypt]
+bcrypt==4.0.1
 psycopg[binary]
 pyjwt
 python-multipart
 redis[asyncio]
+pytest
+pytest-asyncio

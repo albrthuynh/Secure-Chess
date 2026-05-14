@@ -25,8 +25,8 @@ refresh_time: int,
 
 - [x] Matchmaking request endpoint → queue in Redis
 - [x] Create match in Postgres
-- [ ] Issue short-lived match ticket
-- [ ] Deliverable: client can request match and receive {ws_url, ticket, match_id}.
+- [x] Issue short-lived match ticket
+- [x] Deliverable: client can request match and receive {ws_url, ticket, match_id}.
 
 ### Week 3: C++ WebSocket server MVP (real-time core)
 
@@ -36,3 +36,8 @@ refresh_time: int,
 - [ ] Basic room state + broadcast
 - [ ] Deliverable: two clients can play a game end-to-end locally.
 
+###  Week 4: gRPC integration (the “impressive systems” leap)
+- [ ] gRPC VerifyMatchTicket from C++ → FastAPI
+- [ ] gRPC ReportGameEnd from C++ → FastAPI
+- [ ] Persist PGN + game result
+- [ ] Deliverable: ticketed join + games saved automatically.
