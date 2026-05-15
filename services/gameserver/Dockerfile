@@ -4,7 +4,7 @@ WORKDIR /src
 
 # Install build tools (cmake + make)
 RUN apt-get update \
- && apt-get install -y --no-install-recommends cmake make \
+ && apt-get install -y --no-install-recommends cmake make git zlib1g-dev \
  && rm -rf /var/lib/apt/lists/*
 
 # Copy source code into the build container

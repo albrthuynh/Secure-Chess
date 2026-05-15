@@ -18,3 +18,7 @@ cmake-build-*/
 *.exe
 *.a
 *.so
+
+# ai stuff (I'm using it to learn, and write really annoying scripts)
+.codex
+.agents
