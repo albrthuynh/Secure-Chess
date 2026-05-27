@@ -1,5 +1,6 @@
+# THIS FILE WAS A PAIN TO CONFIGURE
 cmake_minimum_required(VERSION 3.20)
-project(gameserver LANGUAGES CXX)
+project(gameserver LANGUAGES C CXX)
 
 SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -26,8 +27,24 @@ FetchContent_Declare(nlohmann_json
     GIT_SHALLOW TRUE
 )
 
-# Actually download all declared libraries — this is the equivalent of npm install
+FetchContent_Declare(chess_library
+  GIT_REPOSITORY https://github.com/Disservin/chess-library.git
+  GIT_TAG 57159616358c2d4c09e0d4fb1562ca7f2d36a2fb  # HEAD of master as of 2026-05-27
+)
+
+# Download libraries that have their own CMakeLists.txt (npm install equivalent)
 FetchContent_MakeAvailable(uSockets uWebSockets nlohmann_json)
+
+# chess-library is header-only with no CMakeLists.txt (it uses Meson instead).
+# FetchContent_MakeAvailable would crash trying to call add_subdirectory on it,
+# so we use the lower-level Populate API: just download, don't try to build.
+# CMP0169=OLD keeps the old FetchContent_Populate(name) API available.
+cmake_policy(SET CMP0169 OLD)
+
+FetchContent_GetProperties(chess_library)
+if(NOT chess_library_POPULATED)
+  FetchContent_Populate(chess_library)
+endif()
 
 # uSockets has no CMakeLists.txt of its own, so we manually compile it into a static library
 # A static library (.a file) is a bundle of compiled code we can link into our binary
@@ -49,6 +66,7 @@ add_executable(gameserver
 target_include_directories(gameserver PRIVATE
     src
     "${uwebsockets_SOURCE_DIR}/src"  # uWebSockets is header-only, just needs its headers on the include path
+    "${chess_library_SOURCE_DIR}/include"  # chess-library: chess.hpp lives in include/
 )
 
 # Our code also needs to know SSL is disabled so it matches how uSockets was compiled

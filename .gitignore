@@ -7,6 +7,7 @@ venv/
 DS_Store
 __pycache__
 .git
+.cache
 
 # Build directories
 build/

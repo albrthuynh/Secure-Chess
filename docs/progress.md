@@ -32,9 +32,9 @@ refresh_time: int,
 
 - [x] WS server accepts connections
 - [x] Basic protocol: join match, send move message
-- [ ] Minimal move validation (start with library or simple checks; upgrade later)
+- [x] Minimal move validation (start with library or simple checks; upgrade later)
 - [x] Basic room state + broadcast
-- [ ] Deliverable: two clients can play a game end-to-end locally.
+- [x] Deliverable: two clients can play a game end-to-end locally.
 
 ###  Week 4: gRPC integration (the “impressive systems” leap)
 - [ ] gRPC VerifyMatchTicket from C++ → FastAPI

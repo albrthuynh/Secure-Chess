@@ -1,14 +1,15 @@
 #pragma once
 #include "config.h"
-#include "App.h" // the websocket file
+#include "App.h"
+#include "chess.hpp"
 #include <unordered_map>
 #include <string>
 
 struct PerSocketData {
-    std::string user_id;
-    std::string username;
-    std::string game_id;
-    std::string color; // "white" or "black"
+  std::string user_id;
+  std::string username;
+  std::string game_id;
+  std::string color; // "white" or "black"
 };
 
 // Type alias so we don't have to write this mouthful everywhere.
@@ -18,16 +19,18 @@ using WsSocket = uWS::WebSocket<false, true, PerSocketData>;
 struct MatchRoom {
   WsSocket* white = nullptr;
   WsSocket* black = nullptr;
+  chess::Board board; // tracks live game state; default-constructed = starting position
 };
 
 class Server {
-    public: 
-        // explicit keyword prevents type conversions when making an object
-        explicit Server(const Config& config);
-        void run();
-    
-    private:
-        Config config_;
-        std::unordered_map<std::string, MatchRoom> rooms_; // matchid -> rooms
-};
+public:
+  explicit Server(const Config& config);
+  void run();
 
+private:
+  Config config_;
+  std::unordered_map<std::string, MatchRoom> rooms_;
+
+  // sends msg to whichever players are currently connected in the room
+  void broadcastToRoom(MatchRoom& room, const std::string& msg);
+};
