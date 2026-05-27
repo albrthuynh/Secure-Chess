@@ -37,16 +37,15 @@ refresh_time: int,
 - [x] Deliverable: two clients can play a game end-to-end locally.
 
 ###  Week 4: gRPC integration (the “impressive systems” leap)
-- [ ] gRPC VerifyMatchTicket from C++ → FastAPI
-- [ ] gRPC ReportGameEnd from C++ → FastAPI
-- [ ] Persist PGN + game result
-- [ ] Deliverable: ticketed join + games saved automatically.
+- [x] gRPC VerifyMatchTicket from C++ → FastAPI
+- [x] gRPC ReportGameEnd from C++ → FastAPI
+- [x] Persist PGN + game result
+- [x] Deliverable: ticketed join + games saved automatically.
 
 ### Week 5: Reliability + security hardening
 
 - [ ] Reconnect/resume (session token or resume ticket)
 - [ ] Per-connection and per-user WS rate limits + message size limits
-- [ ] RBAC scaffolding (admin vs user)
 - [ ] Append-only audit events (login, match start/end, bans)
 - [ ] Deliverable: feels production-ish, not fragile.
 
@@ -59,14 +58,7 @@ refresh_time: int,
 - [ ] Load test: k6 (or a simple custom harness)
 - [ ] Deliverable: perf report: p50/p95/p99 move handling latency under load.
 
-### Week 7: Tournament/admin signature feature (probably don't care for the tournament for this tbh, if admin is related to tournament then scratch this)
-- [ ] Tournament create/join + basic bracket/swiss
-- [ ] Admin actions: kick/ban/pause
-
-(Optional) gRPC ControlStream for pushing admin commands to C++
-Deliverable: “security boundaries + ops controls” showcase.
-
-### Week 8: Polish + portfolio packaging
+### Week 7: Polish + portfolio packaging
 
 Threat model doc
 

@@ -2,6 +2,7 @@
 # running the service 
 # docker compose --env-file infra/.env -f infra/docker-compose.yml up -d
 # docker compose --env-file infra/.env -f infra/docker-compose.yml down
+# docker compose --env-file infra/.env -f infra/docker-compose.yml build
 
 services:
   client:
@@ -12,6 +13,7 @@ services:
     build: ../services/api/
     ports:
       - "8000:8000"
+      - "50051:50051"
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
@@ -24,9 +26,15 @@ services:
       - postgres
       - redis
   gameserver:
-    build: ../services/gameserver/
+    build:
+      context: ../
+      dockerfile: services/gameserver/Dockerfile
     ports:
       - "9001:9001"
+    environment:
+      GRPC_ADDRESS: api-server:50051
+    depends_on:
+      - api-server
   postgres:
     image: postgres:16-alpine
     container_name: secure_chess_postgres_db

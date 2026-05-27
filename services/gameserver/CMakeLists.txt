@@ -5,6 +5,21 @@ project(gameserver LANGUAGES C CXX)
 SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# On macOS, gRPC is installed via Homebrew. On Linux (Docker), it comes from apt.
+# We only add the Homebrew prefix if brew actually exists on this machine.
+find_program(BREW_EXECUTABLE brew)
+if(BREW_EXECUTABLE)
+    execute_process(
+        COMMAND ${BREW_EXECUTABLE} --prefix
+        OUTPUT_VARIABLE HOMEBREW_PREFIX
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    list(APPEND CMAKE_PREFIX_PATH "${HOMEBREW_PREFIX}")
+endif()
+
+find_package(gRPC CONFIG REQUIRED)
+find_package(Protobuf REQUIRED)
+
 # Load CMake's built-in download module — not available by default, must be explicitly enabled
 include(FetchContent)
 
@@ -61,10 +76,14 @@ add_executable(gameserver
   src/main.cpp
   src/config.cpp
   src/server.cpp
+  src/grpc_client.cpp
+  src/generated/gamecontrol.pb.cc
+  src/generated/gamecontrol.grpc.pb.cc
 )
 
 target_include_directories(gameserver PRIVATE
     src
+    src/generated
     "${uwebsockets_SOURCE_DIR}/src"  # uWebSockets is header-only, just needs its headers on the include path
     "${chess_library_SOURCE_DIR}/include"  # chess-library: chess.hpp lives in include/
 )
@@ -73,7 +92,9 @@ target_include_directories(gameserver PRIVATE
 target_compile_definitions(gameserver PRIVATE LIBUS_NO_SSL=1)
 
 target_link_libraries(gameserver PRIVATE
-    uSockets_lib              # the compiled C networking layer
-    nlohmann_json::nlohmann_json  # header-only JSON library
-    z                         # zlib — short name for the system zlib we installed via apt
+    uSockets_lib                   # the compiled C networking layer
+    nlohmann_json::nlohmann_json   # header-only JSON library
+    z                              # zlib — short name for the system zlib we installed via apt
+    gRPC::grpc++                   # gRPC C++ runtime
+    protobuf::libprotobuf          # protobuf serialization
 )

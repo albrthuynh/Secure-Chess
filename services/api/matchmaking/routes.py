@@ -11,7 +11,7 @@ from auth.jwt_helpers import create_match_ticket
 from utils.user_helpers import get_user_id
 from utils.redis_client import get_redis_client
 
-WS_BASE_URL = os.getenv("WS_BASE_URL", "ws://localhost:8080")
+WS_BASE_URL = os.getenv("WS_BASE_URL", "ws://localhost:9001")
 
 router = APIRouter(prefix="/matchmaking", tags=["/matchmaking"])
 
@@ -112,5 +112,23 @@ async def create_request(body: MatchmakingRequestBody, request: Request):
         "time_control": match["time_control"],
         "increment": match["increment"],
         "ticket": match_ticket,
-        "ws_url": f"{WS_BASE_URL}/game/{match_id}",
+        "ws_url": f"{WS_BASE_URL}/ws",
     }
+
+
+@router.get("/ticket")
+async def get_ticket(request: Request):
+    """
+    The first queued player's ticket is stored in Redis after a match is found.
+    This endpoint lets them retrieve it so they can connect to the game server.
+    """
+    redis_client = await get_redis_client()
+    user_id = get_user_id(request)
+
+    ticket = await redis_client.get(f"mm:ticket:{user_id}")
+    if not ticket:
+        raise HTTPException(status_code=404, detail="No ticket found — match may not be ready yet")
+
+    ticket_str = ticket.decode() if isinstance(ticket, bytes) else ticket
+    await redis_client.delete(f"mm:ticket:{user_id}")
+    return {"ticket": ticket_str}

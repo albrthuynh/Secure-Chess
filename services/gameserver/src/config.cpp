@@ -48,6 +48,10 @@ Config Config::FromEnv(int argc, char** argv) {
     config.port = parse_port(env);
   }
 
+  if (const char* env = std::getenv("GRPC_ADDRESS"); env && *env) {
+    config.grpc_address = env;
+  }
+
   // Check the command line arguments first
   // Checking for --port 9001 or --port=9001
   for (int i = 1; i < argc; i++) {

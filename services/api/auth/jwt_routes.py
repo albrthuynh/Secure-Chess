@@ -43,7 +43,7 @@ async def health():
 
 @router.post("/sign-up", status_code=201)
 @rate_limit(
-    max_requests=3, window_seconds=3600, identifier_type="ip", key_prefix="sign-up"
+    max_requests=50, window_seconds=3600, identifier_type="ip", key_prefix="sign-up"
 )
 async def signup(body: SignupBody, request: Request):
     # make sure there is a password policy here
@@ -82,7 +82,7 @@ async def signup(body: SignupBody, request: Request):
 
 @router.post("/sign-in", status_code=200)
 @rate_limit(
-    max_requests=5, window_seconds=900, identifier_type="ip", key_prefix="sign-in"
+    max_requests=50, window_seconds=900, identifier_type="ip", key_prefix="sign-in"
 )
 async def signin(body: SignInBody, request: Request):
     if not body.username or not body.password:
@@ -141,7 +141,7 @@ async def signin(body: SignInBody, request: Request):
 
 @router.post("/refresh")
 @rate_limit(
-    max_requests=20, window_seconds=60, identifier_type="user_id", key_prefix="refresh"
+    max_requests=100, window_seconds=60, identifier_type="user_id", key_prefix="refresh"
 )
 async def refresh(body: RefreshBody, request: Request):
     decoded_token = decode_token(body.refresh_token, token_type="refresh")
@@ -207,7 +207,7 @@ async def refresh(body: RefreshBody, request: Request):
 
 @router.post("/logout")
 @rate_limit(
-    max_requests=20, window_seconds=60, identifier_type="ip", key_prefix="logout"
+    max_requests=100, window_seconds=60, identifier_type="ip", key_prefix="logout"
 )
 async def logout(body: LogoutBody, request: Request):
     try:
