@@ -7,5 +7,7 @@ psycopg[binary]
 pyjwt
 python-multipart
 redis[asyncio]
+grpcio
+grpcio-tools
 pytest
 pytest-asyncio
