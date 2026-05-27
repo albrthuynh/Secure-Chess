@@ -1,23 +1,41 @@
 // This is the .proto file
-// I lowkey don't understand this yet, all I know is that it is supposed to be the "contract."
-// Shared service-to-service API lives in here
 
 // documentation: https://protobuf.dev/getting-started/cpptutorial/
+/* edition = "2023"; This is the new modern way to do stuff in a proto file*/
 
-// start with an edition declaration
-edition = "2026";
+// This is the way we will do it now bc I saw it in a tutorial
+syntax = "proto3";
 
+
+// I believe this is the name of this contract
 package gamecontrol;
 
-message Player {
-  string id = 1;
-  string username = 2;
-  int rating = 3;
+// The service block defines what functions we are exposing
+// It defines the function name, input message, and output message
+// This service block is the contract
+service GameControl {
+  rpc VerifyMatchTicket (VerifyTicketRequest) returns (VerifyTicketResponse);
+  rpc ReportGameEnd (GameEndRequest) returns (GameEndResponse);
 }
 
-message Game {
-  string whitePlayerId = 1;
-  string blackPlayerId = 2;
-  int whitePlayerRating = 3;
-  int blackPlayerRating = 4;
+// Here are all the types, corresponding to the function types btw
+message VerifyTicketRequest {
+  string ticket = 1;
 }
+
+message VerifyTicketResponse {
+  string match_id = 1;
+  string player_id = 2;
+  bool valid = 3;
+}
+
+message GameEndRequest {
+  string match_id = 1;
+  string winner_id = 2;
+  repeated string moves = 3;
+}
+
+message GameEndResponse {
+  bool acknowledged = 1;
+}
+
