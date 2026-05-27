@@ -1,9 +1,11 @@
 #pragma once
-#include "config.h"
 #include "App.h"
 #include "chess.hpp"
-#include <unordered_map>
+#include "config.h"
+#include "grpc_client.h"
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 struct PerSocketData {
   std::string user_id;
@@ -20,6 +22,7 @@ struct MatchRoom {
   WsSocket* white = nullptr;
   WsSocket* black = nullptr;
   chess::Board board; // tracks live game state; default-constructed = starting position
+  std::vector<std::string> move_history; // accumulates moves to send to Python on game end
 };
 
 class Server {
@@ -29,6 +32,7 @@ public:
 
 private:
   Config config_;
+  GrpcClient grpc_client_;
   std::unordered_map<std::string, MatchRoom> rooms_;
 
   // sends msg to whichever players are currently connected in the room

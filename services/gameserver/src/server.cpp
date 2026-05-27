@@ -2,7 +2,7 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 
-Server::Server(const Config& config) : config_(config) {
+Server::Server(const Config& config) : config_(config), grpc_client_(config.grpc_address) {
 }
 
 // Helper so we don't repeat the null-check pattern every time we want to tell both players
@@ -34,16 +34,26 @@ void Server::run() {
                     std::string type = json.value("type", "");
 
                     if (type == "join_match") {
-                      std::string game_id = json.value("game_id", "");
+                      std::string ticket = json.value("ticket", "");
                       std::string color = json.value("color", "");
 
+                      // verify the ticket with Python before allowing the player into the room
+                      VerifyResult verified = grpc_client_.verifyMatchTicket(ticket);
+                      if (!verified.valid) {
+                        ws->send(R"({"type":"error","message":"invalid ticket"})",
+                            uWS::OpCode::TEXT);
+                        ws->close();
+                        return;
+                      }
+
                       auto* data = ws->getUserData();
-                      data->game_id = game_id;
+                      data->game_id = verified.match_id; // trust the server, not the client
+                      data->user_id = verified.player_id;
                       data->color = color;
 
                       // creates the room if it doesn't exist yet, then assigns this socket to the
                       // correct color slot
-                      auto& room = rooms_[game_id];
+                      auto& room = rooms_[verified.match_id];
                       if (color == "white") {
                         room.white = ws;
                       } else {
@@ -107,6 +117,7 @@ void Server::run() {
                       // Only reach here if the move passed all checks. Now we commit it to the
                       // board.
                       board.makeMove(move);
+                      room.move_history.push_back(move_str);
 
                       // After applying, getFen() returns the new position. We send this to both
                       // players so their boards stay perfectly in sync with the server's truth.
@@ -124,7 +135,8 @@ void Server::run() {
                         std::string result_str;
                         if (result == chess::GameResult::LOSE) {
                           // The library reports LOSE from the perspective of the side now to move —
-                          // i.e. the side that just got checkmated. So the winner is the other side.
+                          // i.e. the side that just got checkmated. So the winner is the other
+                          // side.
                           bool white_wins = (board.sideToMove() == chess::Color::BLACK);
                           result_str = white_wins ? "white_wins" : "black_wins";
                         } else {
@@ -157,6 +169,18 @@ void Server::run() {
                           { "result", result_str },
                           { "reason", reason_str } };
                         broadcastToRoom(room, game_over.dump());
+
+                        // determine winner's user_id — empty string means draw
+                        std::string winner_id = "";
+                        if (result == chess::GameResult::LOSE) {
+                          bool white_wins = (board.sideToMove() == chess::Color::BLACK);
+                          if (white_wins && room.white)
+                            winner_id = room.white->getUserData()->user_id;
+                          else if (!white_wins && room.black)
+                            winner_id = room.black->getUserData()->user_id;
+                        }
+
+                        grpc_client_.reportGameEnd(data->game_id, winner_id, room.move_history);
                         rooms_.erase(data->game_id);
                       }
 
