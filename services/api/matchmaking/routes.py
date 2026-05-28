@@ -10,6 +10,7 @@ from .matchmaking_helpers import GameDetails, create_match
 from auth.jwt_helpers import create_match_ticket
 from utils.user_helpers import get_user_id
 from utils.redis_client import get_redis_client
+from utils.audit import write_audit_event
 
 WS_BASE_URL = os.getenv("WS_BASE_URL", "ws://localhost:9001")
 
@@ -93,6 +94,14 @@ async def create_request(body: MatchmakingRequestBody, request: Request):
 
     match = create_match(game_details)
     match_id = match["match_id"]
+
+    write_audit_event("match_start", metadata={
+        "match_id": match_id,
+        "white_user_id": match["white_user_id"],
+        "black_user_id": match["black_user_id"],
+        "time_control": body.time_control,
+        "increment": body.increment,
+    })
 
     # issue the ticket for the requesting user
     match_ticket = create_match_ticket(user_id, match_id)

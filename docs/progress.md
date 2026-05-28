@@ -46,8 +46,8 @@ refresh_time: int,
 
 - [x] Reconnect/resume (session token or resume ticket)
 - [x] Per-connection and per-user WS rate limits + message size limits
-- [ ] Append-only audit events (login, match start/end, bans)
-- [ ] Deliverable: feels production-ish, not fragile.
+- [x] Append-only audit events (login, match start/end, bans)
+- [x] Deliverable: feels production-ish, not fragile.
 
 ### Week 6: Observability + load test (resume gold)
 **Prometheus metrics**

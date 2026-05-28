@@ -18,6 +18,7 @@ import gamecontrol_pb2_grpc
 
 from auth.jwt_helpers import decode_token
 from utils.redis_client import get_redis_client
+from utils.audit import write_audit_event
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
@@ -90,6 +91,13 @@ class GameControlServicer(gamecontrol_pb2_grpc.GameControlServicer):
                 conn.commit()
         except psycopg.Error:
             return gamecontrol_pb2.GameEndResponse(acknowledged=False)
+
+        write_audit_event("game_end", metadata={
+            "match_id": request.match_id,
+            "winner_id": request.winner_id or None,
+            "result": result,
+            "move_count": move_count,
+        })
 
         return gamecontrol_pb2.GameEndResponse(acknowledged=True)
 

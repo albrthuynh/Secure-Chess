@@ -8,6 +8,8 @@ from psycopg.errors import UniqueViolation
 from pydantic import BaseModel, EmailStr
 from .jwt_helpers import create_access_token, create_refresh_token, decode_token
 from middleware.rate_limit import rate_limit
+from middleware.rate_limit import get_client_ip
+from utils.audit import write_audit_event
 
 router = APIRouter(prefix="/auth", tags=["/auth"])
 
@@ -72,6 +74,9 @@ async def signup(body: SignupBody, request: Request):
     except UniqueViolation:
         raise HTTPException(status_code=409, detail="Username or email already exists")
 
+    write_audit_event("signup", user_id=str(row[0]), ip_address=get_client_ip(request),
+        metadata={"username": body.username})
+
     return {
         "user_id": str(row[0]),
         "username": row[1],
@@ -102,11 +107,15 @@ async def signin(body: SignInBody, request: Request):
             row = cur.fetchone()
 
     if row is None:
+        write_audit_event("login_failed", ip_address=get_client_ip(request),
+            metadata={"username": body.username, "reason": "user not found"})
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     user_id, row_username, row_password_hash = row
 
     if not pwd_context.verify(body.password, row_password_hash):
+        write_audit_event("login_failed", user_id=str(user_id), ip_address=get_client_ip(request),
+            metadata={"username": body.username, "reason": "wrong password"})
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     access_token = create_access_token(str(user_id))
@@ -128,6 +137,9 @@ async def signin(body: SignInBody, request: Request):
                 conn.commit()
     except psycopg.Error:
         raise HTTPException(status_code=500, detail="Failed to persist refresh token")
+
+    write_audit_event("login", user_id=str(user_id), ip_address=get_client_ip(request),
+        metadata={"username": row_username})
 
     return {
         "Sign In Successful": True,
@@ -233,5 +245,7 @@ async def logout(body: LogoutBody, request: Request):
             conn.commit()
     except psycopg.Error:
         raise HTTPException(status_code=500, detail="Failed to revoke token")
+
+    write_audit_event("logout", ip_address=get_client_ip(request))
 
     return {"message": "Logged out successfully"}
