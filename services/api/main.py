@@ -4,6 +4,7 @@ from matchmaking.routes import router as matchmaking_router
 from utils.redis_client import close_redis_connection, get_redis_client
 from rpc.server import start_grpc_server
 from fastapi import FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
 
 
 # lifespan context manager for startup/shutdown events (handling the redis lifecycle)
@@ -27,6 +28,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.include_router(auth_router)
 app.include_router(matchmaking_router)
+Instrumentator().instrument(app).expose(app)
 
 
 @app.get("/")

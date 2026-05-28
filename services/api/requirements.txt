@@ -11,3 +11,4 @@ grpcio
 grpcio-tools
 pytest
 pytest-asyncio
+prometheus-fastapi-instrumentator

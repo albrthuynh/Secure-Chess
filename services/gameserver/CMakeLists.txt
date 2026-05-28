@@ -7,6 +7,7 @@ SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # On macOS, gRPC is installed via Homebrew. On Linux (Docker), it comes from apt.
 # We only add the Homebrew prefix if brew actually exists on this machine.
+# This was just a weird case of we want this to work locally and with docker :(
 find_program(BREW_EXECUTABLE brew)
 if(BREW_EXECUTABLE)
     execute_process(
@@ -47,8 +48,20 @@ FetchContent_Declare(chess_library
   GIT_TAG 57159616358c2d4c09e0d4fb1562ca7f2d36a2fb  # HEAD of master as of 2026-05-27
 )
 
+FetchContent_Declare(prometheus-cpp
+  GIT_REPOSITORY https://github.com/jupp0r/prometheus-cpp.git
+  GIT_TAG v1.2.4
+  GIT_SHALLOW TRUE
+)
+
+# For the prometheus stuff we wanna disable some things
+# e.g. we don't want it to build tests and push gateway by default
+set(ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+set(ENABLE_PUSH OFF CACHE BOOL "" FORCE)
+set(ENABLE_COMPRESSION OFF CACHE BOOL "" FORCE)
+
 # Download libraries that have their own CMakeLists.txt (npm install equivalent)
-FetchContent_MakeAvailable(uSockets uWebSockets nlohmann_json)
+FetchContent_MakeAvailable(uSockets uWebSockets nlohmann_json prometheus-cpp)
 
 # chess-library is header-only with no CMakeLists.txt (it uses Meson instead).
 # FetchContent_MakeAvailable would crash trying to call add_subdirectory on it,
@@ -97,4 +110,6 @@ target_link_libraries(gameserver PRIVATE
     z                              # zlib — short name for the system zlib we installed via apt
     gRPC::grpc++                   # gRPC C++ runtime
     protobuf::libprotobuf          # protobuf serialization
+    prometheus-cpp::core            # metric types: counters, gauges, histograms
+    prometheus-cpp::pull            # embedded HTTP server that exposes /metrics for Prometheus to scrape
 )

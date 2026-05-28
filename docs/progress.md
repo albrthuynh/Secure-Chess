@@ -56,6 +56,7 @@ refresh_time: int,
 
 **Grafana dashboard**
 - [ ] Load test: k6 (or a simple custom harness)
+
 - [ ] Deliverable: perf report: p50/p95/p99 move handling latency under load.
 
 ### Week 7: Polish + portfolio packaging
