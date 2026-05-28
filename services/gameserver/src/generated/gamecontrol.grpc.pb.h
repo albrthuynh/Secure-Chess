@@ -61,6 +61,20 @@ class GameControl final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::gamecontrol::GameEndResponse>> PrepareAsyncReportGameEnd(::grpc::ClientContext* context, const ::gamecontrol::GameEndRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::gamecontrol::GameEndResponse>>(PrepareAsyncReportGameEndRaw(context, request, cq));
     }
+    virtual ::grpc::Status CreateResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResumeTokenRequest& request, ::gamecontrol::ResumeTokenResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::gamecontrol::ResumeTokenResponse>> AsyncCreateResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResumeTokenRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::gamecontrol::ResumeTokenResponse>>(AsyncCreateResumeTokenRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::gamecontrol::ResumeTokenResponse>> PrepareAsyncCreateResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResumeTokenRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::gamecontrol::ResumeTokenResponse>>(PrepareAsyncCreateResumeTokenRaw(context, request, cq));
+    }
+    virtual ::grpc::Status ResolveResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResolveTokenRequest& request, ::gamecontrol::ResolveTokenResponse* response) = 0;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::gamecontrol::ResolveTokenResponse>> AsyncResolveResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResolveTokenRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::gamecontrol::ResolveTokenResponse>>(AsyncResolveResumeTokenRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::gamecontrol::ResolveTokenResponse>> PrepareAsyncResolveResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResolveTokenRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReaderInterface< ::gamecontrol::ResolveTokenResponse>>(PrepareAsyncResolveResumeTokenRaw(context, request, cq));
+    }
     class async_interface {
      public:
       virtual ~async_interface() {}
@@ -68,6 +82,10 @@ class GameControl final {
       virtual void VerifyMatchTicket(::grpc::ClientContext* context, const ::gamecontrol::VerifyTicketRequest* request, ::gamecontrol::VerifyTicketResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
       virtual void ReportGameEnd(::grpc::ClientContext* context, const ::gamecontrol::GameEndRequest* request, ::gamecontrol::GameEndResponse* response, std::function<void(::grpc::Status)>) = 0;
       virtual void ReportGameEnd(::grpc::ClientContext* context, const ::gamecontrol::GameEndRequest* request, ::gamecontrol::GameEndResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      virtual void CreateResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResumeTokenRequest* request, ::gamecontrol::ResumeTokenResponse* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void CreateResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResumeTokenRequest* request, ::gamecontrol::ResumeTokenResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
+      virtual void ResolveResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResolveTokenRequest* request, ::gamecontrol::ResolveTokenResponse* response, std::function<void(::grpc::Status)>) = 0;
+      virtual void ResolveResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResolveTokenRequest* request, ::gamecontrol::ResolveTokenResponse* response, ::grpc::ClientUnaryReactor* reactor) = 0;
     };
     typedef class async_interface experimental_async_interface;
     virtual class async_interface* async() { return nullptr; }
@@ -77,6 +95,10 @@ class GameControl final {
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::gamecontrol::VerifyTicketResponse>* PrepareAsyncVerifyMatchTicketRaw(::grpc::ClientContext* context, const ::gamecontrol::VerifyTicketRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::gamecontrol::GameEndResponse>* AsyncReportGameEndRaw(::grpc::ClientContext* context, const ::gamecontrol::GameEndRequest& request, ::grpc::CompletionQueue* cq) = 0;
     virtual ::grpc::ClientAsyncResponseReaderInterface< ::gamecontrol::GameEndResponse>* PrepareAsyncReportGameEndRaw(::grpc::ClientContext* context, const ::gamecontrol::GameEndRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::gamecontrol::ResumeTokenResponse>* AsyncCreateResumeTokenRaw(::grpc::ClientContext* context, const ::gamecontrol::ResumeTokenRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::gamecontrol::ResumeTokenResponse>* PrepareAsyncCreateResumeTokenRaw(::grpc::ClientContext* context, const ::gamecontrol::ResumeTokenRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::gamecontrol::ResolveTokenResponse>* AsyncResolveResumeTokenRaw(::grpc::ClientContext* context, const ::gamecontrol::ResolveTokenRequest& request, ::grpc::CompletionQueue* cq) = 0;
+    virtual ::grpc::ClientAsyncResponseReaderInterface< ::gamecontrol::ResolveTokenResponse>* PrepareAsyncResolveResumeTokenRaw(::grpc::ClientContext* context, const ::gamecontrol::ResolveTokenRequest& request, ::grpc::CompletionQueue* cq) = 0;
   };
   class Stub final : public StubInterface {
    public:
@@ -95,6 +117,20 @@ class GameControl final {
     std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::gamecontrol::GameEndResponse>> PrepareAsyncReportGameEnd(::grpc::ClientContext* context, const ::gamecontrol::GameEndRequest& request, ::grpc::CompletionQueue* cq) {
       return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::gamecontrol::GameEndResponse>>(PrepareAsyncReportGameEndRaw(context, request, cq));
     }
+    ::grpc::Status CreateResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResumeTokenRequest& request, ::gamecontrol::ResumeTokenResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::gamecontrol::ResumeTokenResponse>> AsyncCreateResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResumeTokenRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::gamecontrol::ResumeTokenResponse>>(AsyncCreateResumeTokenRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::gamecontrol::ResumeTokenResponse>> PrepareAsyncCreateResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResumeTokenRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::gamecontrol::ResumeTokenResponse>>(PrepareAsyncCreateResumeTokenRaw(context, request, cq));
+    }
+    ::grpc::Status ResolveResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResolveTokenRequest& request, ::gamecontrol::ResolveTokenResponse* response) override;
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::gamecontrol::ResolveTokenResponse>> AsyncResolveResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResolveTokenRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::gamecontrol::ResolveTokenResponse>>(AsyncResolveResumeTokenRaw(context, request, cq));
+    }
+    std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::gamecontrol::ResolveTokenResponse>> PrepareAsyncResolveResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResolveTokenRequest& request, ::grpc::CompletionQueue* cq) {
+      return std::unique_ptr< ::grpc::ClientAsyncResponseReader< ::gamecontrol::ResolveTokenResponse>>(PrepareAsyncResolveResumeTokenRaw(context, request, cq));
+    }
     class async final :
       public StubInterface::async_interface {
      public:
@@ -102,6 +138,10 @@ class GameControl final {
       void VerifyMatchTicket(::grpc::ClientContext* context, const ::gamecontrol::VerifyTicketRequest* request, ::gamecontrol::VerifyTicketResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
       void ReportGameEnd(::grpc::ClientContext* context, const ::gamecontrol::GameEndRequest* request, ::gamecontrol::GameEndResponse* response, std::function<void(::grpc::Status)>) override;
       void ReportGameEnd(::grpc::ClientContext* context, const ::gamecontrol::GameEndRequest* request, ::gamecontrol::GameEndResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      void CreateResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResumeTokenRequest* request, ::gamecontrol::ResumeTokenResponse* response, std::function<void(::grpc::Status)>) override;
+      void CreateResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResumeTokenRequest* request, ::gamecontrol::ResumeTokenResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
+      void ResolveResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResolveTokenRequest* request, ::gamecontrol::ResolveTokenResponse* response, std::function<void(::grpc::Status)>) override;
+      void ResolveResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResolveTokenRequest* request, ::gamecontrol::ResolveTokenResponse* response, ::grpc::ClientUnaryReactor* reactor) override;
      private:
       friend class Stub;
       explicit async(Stub* stub): stub_(stub) { }
@@ -117,8 +157,14 @@ class GameControl final {
     ::grpc::ClientAsyncResponseReader< ::gamecontrol::VerifyTicketResponse>* PrepareAsyncVerifyMatchTicketRaw(::grpc::ClientContext* context, const ::gamecontrol::VerifyTicketRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::gamecontrol::GameEndResponse>* AsyncReportGameEndRaw(::grpc::ClientContext* context, const ::gamecontrol::GameEndRequest& request, ::grpc::CompletionQueue* cq) override;
     ::grpc::ClientAsyncResponseReader< ::gamecontrol::GameEndResponse>* PrepareAsyncReportGameEndRaw(::grpc::ClientContext* context, const ::gamecontrol::GameEndRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::gamecontrol::ResumeTokenResponse>* AsyncCreateResumeTokenRaw(::grpc::ClientContext* context, const ::gamecontrol::ResumeTokenRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::gamecontrol::ResumeTokenResponse>* PrepareAsyncCreateResumeTokenRaw(::grpc::ClientContext* context, const ::gamecontrol::ResumeTokenRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::gamecontrol::ResolveTokenResponse>* AsyncResolveResumeTokenRaw(::grpc::ClientContext* context, const ::gamecontrol::ResolveTokenRequest& request, ::grpc::CompletionQueue* cq) override;
+    ::grpc::ClientAsyncResponseReader< ::gamecontrol::ResolveTokenResponse>* PrepareAsyncResolveResumeTokenRaw(::grpc::ClientContext* context, const ::gamecontrol::ResolveTokenRequest& request, ::grpc::CompletionQueue* cq) override;
     const ::grpc::internal::RpcMethod rpcmethod_VerifyMatchTicket_;
     const ::grpc::internal::RpcMethod rpcmethod_ReportGameEnd_;
+    const ::grpc::internal::RpcMethod rpcmethod_CreateResumeToken_;
+    const ::grpc::internal::RpcMethod rpcmethod_ResolveResumeToken_;
   };
   static std::unique_ptr<Stub> NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options = ::grpc::StubOptions());
 
@@ -128,6 +174,8 @@ class GameControl final {
     virtual ~Service();
     virtual ::grpc::Status VerifyMatchTicket(::grpc::ServerContext* context, const ::gamecontrol::VerifyTicketRequest* request, ::gamecontrol::VerifyTicketResponse* response);
     virtual ::grpc::Status ReportGameEnd(::grpc::ServerContext* context, const ::gamecontrol::GameEndRequest* request, ::gamecontrol::GameEndResponse* response);
+    virtual ::grpc::Status CreateResumeToken(::grpc::ServerContext* context, const ::gamecontrol::ResumeTokenRequest* request, ::gamecontrol::ResumeTokenResponse* response);
+    virtual ::grpc::Status ResolveResumeToken(::grpc::ServerContext* context, const ::gamecontrol::ResolveTokenRequest* request, ::gamecontrol::ResolveTokenResponse* response);
   };
   template <class BaseClass>
   class WithAsyncMethod_VerifyMatchTicket : public BaseClass {
@@ -169,7 +217,47 @@ class GameControl final {
       ::grpc::Service::RequestAsyncUnary(1, context, request, response, new_call_cq, notification_cq, tag);
     }
   };
-  typedef WithAsyncMethod_VerifyMatchTicket<WithAsyncMethod_ReportGameEnd<Service > > AsyncService;
+  template <class BaseClass>
+  class WithAsyncMethod_CreateResumeToken : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_CreateResumeToken() {
+      ::grpc::Service::MarkMethodAsync(2);
+    }
+    ~WithAsyncMethod_CreateResumeToken() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status CreateResumeToken(::grpc::ServerContext* /*context*/, const ::gamecontrol::ResumeTokenRequest* /*request*/, ::gamecontrol::ResumeTokenResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestCreateResumeToken(::grpc::ServerContext* context, ::gamecontrol::ResumeTokenRequest* request, ::grpc::ServerAsyncResponseWriter< ::gamecontrol::ResumeTokenResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(2, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithAsyncMethod_ResolveResumeToken : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithAsyncMethod_ResolveResumeToken() {
+      ::grpc::Service::MarkMethodAsync(3);
+    }
+    ~WithAsyncMethod_ResolveResumeToken() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ResolveResumeToken(::grpc::ServerContext* /*context*/, const ::gamecontrol::ResolveTokenRequest* /*request*/, ::gamecontrol::ResolveTokenResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestResolveResumeToken(::grpc::ServerContext* context, ::gamecontrol::ResolveTokenRequest* request, ::grpc::ServerAsyncResponseWriter< ::gamecontrol::ResolveTokenResponse>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  typedef WithAsyncMethod_VerifyMatchTicket<WithAsyncMethod_ReportGameEnd<WithAsyncMethod_CreateResumeToken<WithAsyncMethod_ResolveResumeToken<Service > > > > AsyncService;
   template <class BaseClass>
   class WithCallbackMethod_VerifyMatchTicket : public BaseClass {
    private:
@@ -224,7 +312,61 @@ class GameControl final {
     virtual ::grpc::ServerUnaryReactor* ReportGameEnd(
       ::grpc::CallbackServerContext* /*context*/, const ::gamecontrol::GameEndRequest* /*request*/, ::gamecontrol::GameEndResponse* /*response*/)  { return nullptr; }
   };
-  typedef WithCallbackMethod_VerifyMatchTicket<WithCallbackMethod_ReportGameEnd<Service > > CallbackService;
+  template <class BaseClass>
+  class WithCallbackMethod_CreateResumeToken : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithCallbackMethod_CreateResumeToken() {
+      ::grpc::Service::MarkMethodCallback(2,
+          new ::grpc::internal::CallbackUnaryHandler< ::gamecontrol::ResumeTokenRequest, ::gamecontrol::ResumeTokenResponse>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::gamecontrol::ResumeTokenRequest* request, ::gamecontrol::ResumeTokenResponse* response) { return this->CreateResumeToken(context, request, response); }));}
+    void SetMessageAllocatorFor_CreateResumeToken(
+        ::grpc::MessageAllocator< ::gamecontrol::ResumeTokenRequest, ::gamecontrol::ResumeTokenResponse>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(2);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::gamecontrol::ResumeTokenRequest, ::gamecontrol::ResumeTokenResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~WithCallbackMethod_CreateResumeToken() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status CreateResumeToken(::grpc::ServerContext* /*context*/, const ::gamecontrol::ResumeTokenRequest* /*request*/, ::gamecontrol::ResumeTokenResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* CreateResumeToken(
+      ::grpc::CallbackServerContext* /*context*/, const ::gamecontrol::ResumeTokenRequest* /*request*/, ::gamecontrol::ResumeTokenResponse* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
+  class WithCallbackMethod_ResolveResumeToken : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithCallbackMethod_ResolveResumeToken() {
+      ::grpc::Service::MarkMethodCallback(3,
+          new ::grpc::internal::CallbackUnaryHandler< ::gamecontrol::ResolveTokenRequest, ::gamecontrol::ResolveTokenResponse>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::gamecontrol::ResolveTokenRequest* request, ::gamecontrol::ResolveTokenResponse* response) { return this->ResolveResumeToken(context, request, response); }));}
+    void SetMessageAllocatorFor_ResolveResumeToken(
+        ::grpc::MessageAllocator< ::gamecontrol::ResolveTokenRequest, ::gamecontrol::ResolveTokenResponse>* allocator) {
+      ::grpc::internal::MethodHandler* const handler = ::grpc::Service::GetHandler(3);
+      static_cast<::grpc::internal::CallbackUnaryHandler< ::gamecontrol::ResolveTokenRequest, ::gamecontrol::ResolveTokenResponse>*>(handler)
+              ->SetMessageAllocator(allocator);
+    }
+    ~WithCallbackMethod_ResolveResumeToken() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ResolveResumeToken(::grpc::ServerContext* /*context*/, const ::gamecontrol::ResolveTokenRequest* /*request*/, ::gamecontrol::ResolveTokenResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* ResolveResumeToken(
+      ::grpc::CallbackServerContext* /*context*/, const ::gamecontrol::ResolveTokenRequest* /*request*/, ::gamecontrol::ResolveTokenResponse* /*response*/)  { return nullptr; }
+  };
+  typedef WithCallbackMethod_VerifyMatchTicket<WithCallbackMethod_ReportGameEnd<WithCallbackMethod_CreateResumeToken<WithCallbackMethod_ResolveResumeToken<Service > > > > CallbackService;
   typedef CallbackService ExperimentalCallbackService;
   template <class BaseClass>
   class WithGenericMethod_VerifyMatchTicket : public BaseClass {
@@ -256,6 +398,40 @@ class GameControl final {
     }
     // disable synchronous version of this method
     ::grpc::Status ReportGameEnd(::grpc::ServerContext* /*context*/, const ::gamecontrol::GameEndRequest* /*request*/, ::gamecontrol::GameEndResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_CreateResumeToken : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_CreateResumeToken() {
+      ::grpc::Service::MarkMethodGeneric(2);
+    }
+    ~WithGenericMethod_CreateResumeToken() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status CreateResumeToken(::grpc::ServerContext* /*context*/, const ::gamecontrol::ResumeTokenRequest* /*request*/, ::gamecontrol::ResumeTokenResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+  };
+  template <class BaseClass>
+  class WithGenericMethod_ResolveResumeToken : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithGenericMethod_ResolveResumeToken() {
+      ::grpc::Service::MarkMethodGeneric(3);
+    }
+    ~WithGenericMethod_ResolveResumeToken() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ResolveResumeToken(::grpc::ServerContext* /*context*/, const ::gamecontrol::ResolveTokenRequest* /*request*/, ::gamecontrol::ResolveTokenResponse* /*response*/) override {
       abort();
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
@@ -301,6 +477,46 @@ class GameControl final {
     }
   };
   template <class BaseClass>
+  class WithRawMethod_CreateResumeToken : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_CreateResumeToken() {
+      ::grpc::Service::MarkMethodRaw(2);
+    }
+    ~WithRawMethod_CreateResumeToken() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status CreateResumeToken(::grpc::ServerContext* /*context*/, const ::gamecontrol::ResumeTokenRequest* /*request*/, ::gamecontrol::ResumeTokenResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestCreateResumeToken(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(2, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
+  class WithRawMethod_ResolveResumeToken : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawMethod_ResolveResumeToken() {
+      ::grpc::Service::MarkMethodRaw(3);
+    }
+    ~WithRawMethod_ResolveResumeToken() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ResolveResumeToken(::grpc::ServerContext* /*context*/, const ::gamecontrol::ResolveTokenRequest* /*request*/, ::gamecontrol::ResolveTokenResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    void RequestResolveResumeToken(::grpc::ServerContext* context, ::grpc::ByteBuffer* request, ::grpc::ServerAsyncResponseWriter< ::grpc::ByteBuffer>* response, ::grpc::CompletionQueue* new_call_cq, ::grpc::ServerCompletionQueue* notification_cq, void *tag) {
+      ::grpc::Service::RequestAsyncUnary(3, context, request, response, new_call_cq, notification_cq, tag);
+    }
+  };
+  template <class BaseClass>
   class WithRawCallbackMethod_VerifyMatchTicket : public BaseClass {
    private:
     void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
@@ -342,6 +558,50 @@ class GameControl final {
       return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
     }
     virtual ::grpc::ServerUnaryReactor* ReportGameEnd(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
+  class WithRawCallbackMethod_CreateResumeToken : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawCallbackMethod_CreateResumeToken() {
+      ::grpc::Service::MarkMethodRawCallback(2,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->CreateResumeToken(context, request, response); }));
+    }
+    ~WithRawCallbackMethod_CreateResumeToken() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status CreateResumeToken(::grpc::ServerContext* /*context*/, const ::gamecontrol::ResumeTokenRequest* /*request*/, ::gamecontrol::ResumeTokenResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* CreateResumeToken(
+      ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
+  };
+  template <class BaseClass>
+  class WithRawCallbackMethod_ResolveResumeToken : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithRawCallbackMethod_ResolveResumeToken() {
+      ::grpc::Service::MarkMethodRawCallback(3,
+          new ::grpc::internal::CallbackUnaryHandler< ::grpc::ByteBuffer, ::grpc::ByteBuffer>(
+            [this](
+                   ::grpc::CallbackServerContext* context, const ::grpc::ByteBuffer* request, ::grpc::ByteBuffer* response) { return this->ResolveResumeToken(context, request, response); }));
+    }
+    ~WithRawCallbackMethod_ResolveResumeToken() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable synchronous version of this method
+    ::grpc::Status ResolveResumeToken(::grpc::ServerContext* /*context*/, const ::gamecontrol::ResolveTokenRequest* /*request*/, ::gamecontrol::ResolveTokenResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    virtual ::grpc::ServerUnaryReactor* ResolveResumeToken(
       ::grpc::CallbackServerContext* /*context*/, const ::grpc::ByteBuffer* /*request*/, ::grpc::ByteBuffer* /*response*/)  { return nullptr; }
   };
   template <class BaseClass>
@@ -398,9 +658,63 @@ class GameControl final {
     // replace default version of method with streamed unary
     virtual ::grpc::Status StreamedReportGameEnd(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::gamecontrol::GameEndRequest,::gamecontrol::GameEndResponse>* server_unary_streamer) = 0;
   };
-  typedef WithStreamedUnaryMethod_VerifyMatchTicket<WithStreamedUnaryMethod_ReportGameEnd<Service > > StreamedUnaryService;
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_CreateResumeToken : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_CreateResumeToken() {
+      ::grpc::Service::MarkMethodStreamed(2,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::gamecontrol::ResumeTokenRequest, ::gamecontrol::ResumeTokenResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::gamecontrol::ResumeTokenRequest, ::gamecontrol::ResumeTokenResponse>* streamer) {
+                       return this->StreamedCreateResumeToken(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_CreateResumeToken() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status CreateResumeToken(::grpc::ServerContext* /*context*/, const ::gamecontrol::ResumeTokenRequest* /*request*/, ::gamecontrol::ResumeTokenResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedCreateResumeToken(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::gamecontrol::ResumeTokenRequest,::gamecontrol::ResumeTokenResponse>* server_unary_streamer) = 0;
+  };
+  template <class BaseClass>
+  class WithStreamedUnaryMethod_ResolveResumeToken : public BaseClass {
+   private:
+    void BaseClassMustBeDerivedFromService(const Service* /*service*/) {}
+   public:
+    WithStreamedUnaryMethod_ResolveResumeToken() {
+      ::grpc::Service::MarkMethodStreamed(3,
+        new ::grpc::internal::StreamedUnaryHandler<
+          ::gamecontrol::ResolveTokenRequest, ::gamecontrol::ResolveTokenResponse>(
+            [this](::grpc::ServerContext* context,
+                   ::grpc::ServerUnaryStreamer<
+                     ::gamecontrol::ResolveTokenRequest, ::gamecontrol::ResolveTokenResponse>* streamer) {
+                       return this->StreamedResolveResumeToken(context,
+                         streamer);
+                  }));
+    }
+    ~WithStreamedUnaryMethod_ResolveResumeToken() override {
+      BaseClassMustBeDerivedFromService(this);
+    }
+    // disable regular version of this method
+    ::grpc::Status ResolveResumeToken(::grpc::ServerContext* /*context*/, const ::gamecontrol::ResolveTokenRequest* /*request*/, ::gamecontrol::ResolveTokenResponse* /*response*/) override {
+      abort();
+      return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+    }
+    // replace default version of method with streamed unary
+    virtual ::grpc::Status StreamedResolveResumeToken(::grpc::ServerContext* context, ::grpc::ServerUnaryStreamer< ::gamecontrol::ResolveTokenRequest,::gamecontrol::ResolveTokenResponse>* server_unary_streamer) = 0;
+  };
+  typedef WithStreamedUnaryMethod_VerifyMatchTicket<WithStreamedUnaryMethod_ReportGameEnd<WithStreamedUnaryMethod_CreateResumeToken<WithStreamedUnaryMethod_ResolveResumeToken<Service > > > > StreamedUnaryService;
   typedef Service SplitStreamedService;
-  typedef WithStreamedUnaryMethod_VerifyMatchTicket<WithStreamedUnaryMethod_ReportGameEnd<Service > > StreamedService;
+  typedef WithStreamedUnaryMethod_VerifyMatchTicket<WithStreamedUnaryMethod_ReportGameEnd<WithStreamedUnaryMethod_CreateResumeToken<WithStreamedUnaryMethod_ResolveResumeToken<Service > > > > StreamedService;
 };
 
 }  // namespace gamecontrol

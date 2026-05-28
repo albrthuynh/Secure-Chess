@@ -25,6 +25,8 @@ namespace gamecontrol {
 static const char* GameControl_method_names[] = {
   "/gamecontrol.GameControl/VerifyMatchTicket",
   "/gamecontrol.GameControl/ReportGameEnd",
+  "/gamecontrol.GameControl/CreateResumeToken",
+  "/gamecontrol.GameControl/ResolveResumeToken",
 };
 
 std::unique_ptr< GameControl::Stub> GameControl::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
@@ -36,6 +38,8 @@ std::unique_ptr< GameControl::Stub> GameControl::NewStub(const std::shared_ptr< 
 GameControl::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options)
   : channel_(channel), rpcmethod_VerifyMatchTicket_(GameControl_method_names[0], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   , rpcmethod_ReportGameEnd_(GameControl_method_names[1], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_CreateResumeToken_(GameControl_method_names[2], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_ResolveResumeToken_(GameControl_method_names[3], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status GameControl::Stub::VerifyMatchTicket(::grpc::ClientContext* context, const ::gamecontrol::VerifyTicketRequest& request, ::gamecontrol::VerifyTicketResponse* response) {
@@ -84,6 +88,52 @@ void GameControl::Stub::async::ReportGameEnd(::grpc::ClientContext* context, con
   return result;
 }
 
+::grpc::Status GameControl::Stub::CreateResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResumeTokenRequest& request, ::gamecontrol::ResumeTokenResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::gamecontrol::ResumeTokenRequest, ::gamecontrol::ResumeTokenResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_CreateResumeToken_, context, request, response);
+}
+
+void GameControl::Stub::async::CreateResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResumeTokenRequest* request, ::gamecontrol::ResumeTokenResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::gamecontrol::ResumeTokenRequest, ::gamecontrol::ResumeTokenResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_CreateResumeToken_, context, request, response, std::move(f));
+}
+
+void GameControl::Stub::async::CreateResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResumeTokenRequest* request, ::gamecontrol::ResumeTokenResponse* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_CreateResumeToken_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::gamecontrol::ResumeTokenResponse>* GameControl::Stub::PrepareAsyncCreateResumeTokenRaw(::grpc::ClientContext* context, const ::gamecontrol::ResumeTokenRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::gamecontrol::ResumeTokenResponse, ::gamecontrol::ResumeTokenRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_CreateResumeToken_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::gamecontrol::ResumeTokenResponse>* GameControl::Stub::AsyncCreateResumeTokenRaw(::grpc::ClientContext* context, const ::gamecontrol::ResumeTokenRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncCreateResumeTokenRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
+::grpc::Status GameControl::Stub::ResolveResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResolveTokenRequest& request, ::gamecontrol::ResolveTokenResponse* response) {
+  return ::grpc::internal::BlockingUnaryCall< ::gamecontrol::ResolveTokenRequest, ::gamecontrol::ResolveTokenResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_ResolveResumeToken_, context, request, response);
+}
+
+void GameControl::Stub::async::ResolveResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResolveTokenRequest* request, ::gamecontrol::ResolveTokenResponse* response, std::function<void(::grpc::Status)> f) {
+  ::grpc::internal::CallbackUnaryCall< ::gamecontrol::ResolveTokenRequest, ::gamecontrol::ResolveTokenResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_ResolveResumeToken_, context, request, response, std::move(f));
+}
+
+void GameControl::Stub::async::ResolveResumeToken(::grpc::ClientContext* context, const ::gamecontrol::ResolveTokenRequest* request, ::gamecontrol::ResolveTokenResponse* response, ::grpc::ClientUnaryReactor* reactor) {
+  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_ResolveResumeToken_, context, request, response, reactor);
+}
+
+::grpc::ClientAsyncResponseReader< ::gamecontrol::ResolveTokenResponse>* GameControl::Stub::PrepareAsyncResolveResumeTokenRaw(::grpc::ClientContext* context, const ::gamecontrol::ResolveTokenRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::gamecontrol::ResolveTokenResponse, ::gamecontrol::ResolveTokenRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_ResolveResumeToken_, context, request);
+}
+
+::grpc::ClientAsyncResponseReader< ::gamecontrol::ResolveTokenResponse>* GameControl::Stub::AsyncResolveResumeTokenRaw(::grpc::ClientContext* context, const ::gamecontrol::ResolveTokenRequest& request, ::grpc::CompletionQueue* cq) {
+  auto* result =
+    this->PrepareAsyncResolveResumeTokenRaw(context, request, cq);
+  result->StartCall();
+  return result;
+}
+
 GameControl::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       GameControl_method_names[0],
@@ -105,6 +155,26 @@ GameControl::Service::Service() {
              ::gamecontrol::GameEndResponse* resp) {
                return service->ReportGameEnd(ctx, req, resp);
              }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      GameControl_method_names[2],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< GameControl::Service, ::gamecontrol::ResumeTokenRequest, ::gamecontrol::ResumeTokenResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](GameControl::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::gamecontrol::ResumeTokenRequest* req,
+             ::gamecontrol::ResumeTokenResponse* resp) {
+               return service->CreateResumeToken(ctx, req, resp);
+             }, this)));
+  AddMethod(new ::grpc::internal::RpcServiceMethod(
+      GameControl_method_names[3],
+      ::grpc::internal::RpcMethod::NORMAL_RPC,
+      new ::grpc::internal::RpcMethodHandler< GameControl::Service, ::gamecontrol::ResolveTokenRequest, ::gamecontrol::ResolveTokenResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
+          [](GameControl::Service* service,
+             ::grpc::ServerContext* ctx,
+             const ::gamecontrol::ResolveTokenRequest* req,
+             ::gamecontrol::ResolveTokenResponse* resp) {
+               return service->ResolveResumeToken(ctx, req, resp);
+             }, this)));
 }
 
 GameControl::Service::~Service() {
@@ -118,6 +188,20 @@ GameControl::Service::~Service() {
 }
 
 ::grpc::Status GameControl::Service::ReportGameEnd(::grpc::ServerContext* context, const ::gamecontrol::GameEndRequest* request, ::gamecontrol::GameEndResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status GameControl::Service::CreateResumeToken(::grpc::ServerContext* context, const ::gamecontrol::ResumeTokenRequest* request, ::gamecontrol::ResumeTokenResponse* response) {
+  (void) context;
+  (void) request;
+  (void) response;
+  return ::grpc::Status(::grpc::StatusCode::UNIMPLEMENTED, "");
+}
+
+::grpc::Status GameControl::Service::ResolveResumeToken(::grpc::ServerContext* context, const ::gamecontrol::ResolveTokenRequest* request, ::gamecontrol::ResolveTokenResponse* response) {
   (void) context;
   (void) request;
   (void) response;

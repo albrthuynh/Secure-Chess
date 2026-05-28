@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11gamecontrol.proto\x12\x0bgamecontrol\"%\n\x13VerifyTicketRequest\x12\x0e\n\x06ticket\x18\x01 \x01(\t\"J\n\x14VerifyTicketResponse\x12\x10\n\x08match_id\x18\x01 \x01(\t\x12\x11\n\tplayer_id\x18\x02 \x01(\t\x12\r\n\x05valid\x18\x03 \x01(\x08\"D\n\x0eGameEndRequest\x12\x10\n\x08match_id\x18\x01 \x01(\t\x12\x11\n\twinner_id\x18\x02 \x01(\t\x12\r\n\x05moves\x18\x03 \x03(\t\"\'\n\x0fGameEndResponse\x12\x14\n\x0c\x61\x63knowledged\x18\x01 \x01(\x08\x32\xb3\x01\n\x0bGameControl\x12X\n\x11VerifyMatchTicket\x12 .gamecontrol.VerifyTicketRequest\x1a!.gamecontrol.VerifyTicketResponse\x12J\n\rReportGameEnd\x12\x1b.gamecontrol.GameEndRequest\x1a\x1c.gamecontrol.GameEndResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11gamecontrol.proto\x12\x0bgamecontrol\"%\n\x13VerifyTicketRequest\x12\x0e\n\x06ticket\x18\x01 \x01(\t\"J\n\x14VerifyTicketResponse\x12\x10\n\x08match_id\x18\x01 \x01(\t\x12\x11\n\tplayer_id\x18\x02 \x01(\t\x12\r\n\x05valid\x18\x03 \x01(\x08\"D\n\x0eGameEndRequest\x12\x10\n\x08match_id\x18\x01 \x01(\t\x12\x11\n\twinner_id\x18\x02 \x01(\t\x12\r\n\x05moves\x18\x03 \x03(\t\"\'\n\x0fGameEndResponse\x12\x14\n\x0c\x61\x63knowledged\x18\x01 \x01(\x08\"F\n\x12ResumeTokenRequest\x12\x10\n\x08match_id\x18\x01 \x01(\t\x12\x0f\n\x07user_id\x18\x02 \x01(\t\x12\r\n\x05\x63olor\x18\x03 \x01(\t\"$\n\x13ResumeTokenResponse\x12\r\n\x05token\x18\x01 \x01(\t\"$\n\x13ResolveTokenRequest\x12\r\n\x05token\x18\x01 \x01(\t\"W\n\x14ResolveTokenResponse\x12\r\n\x05valid\x18\x01 \x01(\x08\x12\x10\n\x08match_id\x18\x02 \x01(\t\x12\x0f\n\x07user_id\x18\x03 \x01(\t\x12\r\n\x05\x63olor\x18\x04 \x01(\t2\xe6\x02\n\x0bGameControl\x12X\n\x11VerifyMatchTicket\x12 .gamecontrol.VerifyTicketRequest\x1a!.gamecontrol.VerifyTicketResponse\x12J\n\rReportGameEnd\x12\x1b.gamecontrol.GameEndRequest\x1a\x1c.gamecontrol.GameEndResponse\x12V\n\x11\x43reateResumeToken\x12\x1f.gamecontrol.ResumeTokenRequest\x1a .gamecontrol.ResumeTokenResponse\x12Y\n\x12ResolveResumeToken\x12 .gamecontrol.ResolveTokenRequest\x1a!.gamecontrol.ResolveTokenResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -39,6 +39,14 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_GAMEENDREQUEST']._serialized_end=217
   _globals['_GAMEENDRESPONSE']._serialized_start=219
   _globals['_GAMEENDRESPONSE']._serialized_end=258
-  _globals['_GAMECONTROL']._serialized_start=261
-  _globals['_GAMECONTROL']._serialized_end=440
+  _globals['_RESUMETOKENREQUEST']._serialized_start=260
+  _globals['_RESUMETOKENREQUEST']._serialized_end=330
+  _globals['_RESUMETOKENRESPONSE']._serialized_start=332
+  _globals['_RESUMETOKENRESPONSE']._serialized_end=368
+  _globals['_RESOLVETOKENREQUEST']._serialized_start=370
+  _globals['_RESOLVETOKENREQUEST']._serialized_end=406
+  _globals['_RESOLVETOKENRESPONSE']._serialized_start=408
+  _globals['_RESOLVETOKENRESPONSE']._serialized_end=495
+  _globals['_GAMECONTROL']._serialized_start=498
+  _globals['_GAMECONTROL']._serialized_end=856
 # @@protoc_insertion_point(module_scope)

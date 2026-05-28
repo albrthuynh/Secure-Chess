@@ -16,6 +16,8 @@ package gamecontrol;
 service GameControl {
   rpc VerifyMatchTicket (VerifyTicketRequest) returns (VerifyTicketResponse);
   rpc ReportGameEnd (GameEndRequest) returns (GameEndResponse);
+  rpc CreateResumeToken (ResumeTokenRequest) returns (ResumeTokenResponse);
+  rpc ResolveResumeToken (ResolveTokenRequest) returns (ResolveTokenResponse);
 }
 
 // Here are all the types, corresponding to the function types btw
@@ -39,3 +41,23 @@ message GameEndResponse {
   bool acknowledged = 1;
 }
 
+message ResumeTokenRequest {
+  string match_id = 1;
+  string user_id = 2;
+  string color = 3; // store this so resolve can return it
+}
+
+message ResumeTokenResponse {
+  string token = 1; // store this so token string can send back to client
+}
+
+message ResolveTokenRequest {
+  string token = 1; // the actual token string being sent back to client
+}
+
+message ResolveTokenResponse {
+  bool valid = 1; 
+  string match_id = 2;
+  string user_id = 3;
+  string color = 4;
+}

@@ -5,6 +5,7 @@ Essentially the class handling all of the functions defined in the protofile
 
 import os
 import sys
+import secrets
 import psycopg
 from fastapi import HTTPException
 
@@ -16,8 +17,11 @@ import gamecontrol_pb2
 import gamecontrol_pb2_grpc
 
 from auth.jwt_helpers import decode_token
+from utils.redis_client import get_redis_client
 
 DATABASE_URL = os.getenv("DATABASE_URL")
+
+RESUME_TOKEN_TTL = 3600  # seconds — 1 hour window to reconnect
 
 
 class GameControlServicer(gamecontrol_pb2_grpc.GameControlServicer):
@@ -88,3 +92,29 @@ class GameControlServicer(gamecontrol_pb2_grpc.GameControlServicer):
             return gamecontrol_pb2.GameEndResponse(acknowledged=False)
 
         return gamecontrol_pb2.GameEndResponse(acknowledged=True)
+
+    async def CreateResumeToken(self, request, context):
+        token = secrets.token_urlsafe(32)  # cryptographically random, URL-safe string
+
+        # Key pattern: resume:<token>  →  "match_id:user_id:color"
+        # We key by token (not by user) so Resolve is a single O(1) lookup.
+        redis = await get_redis_client()
+        value = f"{request.match_id}:{request.user_id}:{request.color}"
+        await redis.set(f"resume:{token}", value, ex=RESUME_TOKEN_TTL)
+
+        return gamecontrol_pb2.ResumeTokenResponse(token=token)
+
+    async def ResolveResumeToken(self, request, context):
+        redis = await get_redis_client()
+        value = await redis.getdel(f"resume:{request.token}")  # atomic get-and-delete = single-use
+
+        if not value:
+            return gamecontrol_pb2.ResolveTokenResponse(valid=False)
+
+        match_id, user_id, color = value.split(":")
+        return gamecontrol_pb2.ResolveTokenResponse(
+            valid=True,
+            match_id=match_id,
+            user_id=user_id,
+            color=color,
+        )
