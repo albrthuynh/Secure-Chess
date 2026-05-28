@@ -3,6 +3,10 @@
 # docker compose --env-file infra/.env -f infra/docker-compose.yml up -d
 # docker compose --env-file infra/.env -f infra/docker-compose.yml down
 # docker compose --env-file infra/.env -f infra/docker-compose.yml build
+#
+# If there is ever a migration for a database or anything here is the command for that
+# (make sure the postgres server is up and running)
+# docker compose -f infra/docker-compose.yml exec -T postgres psql -U <user> -d <db> < infra/migrations/[filemigration.sql]
 
 services:
   client:
