@@ -60,10 +60,16 @@ void Server::run() {
                         room.black = ws;
                       }
 
-                      // send back the starting FEN so the client can render the initial board state
+                      // send back the starting FEN and a resume token
+                      // the client holds onto the token and presents it if they reconnect
+                      std::string resume_token = grpc_client_.createResumeToken(verified.match_id,
+                          verified.player_id,
+                          color);
+
                       nlohmann::json response = { { "type", "joined" },
                         { "color", color },
-                        { "fen", room.board.getFen() } };
+                        { "fen", room.board.getFen() },
+                        { "resume_token", resume_token } };
                       ws->send(response.dump(), uWS::OpCode::TEXT);
 
                     } else if (type == "move") {
@@ -183,6 +189,54 @@ void Server::run() {
                         grpc_client_.reportGameEnd(data->game_id, winner_id, room.move_history);
                         rooms_.erase(data->game_id);
                       }
+
+                    } else if (type == "resume_match") {
+                      std::string token = json.value("resume_token", "");
+
+                      ResolveResult resolved = grpc_client_.resolveResumeToken(token);
+                      if (!resolved.valid) {
+                        ws->send(R"({"type":"error","message":"invalid resume token"})",
+                            uWS::OpCode::TEXT);
+                        ws->close();
+                        return;
+                      }
+
+                      auto it = rooms_.find(resolved.match_id);
+                      if (it == rooms_.end()) {
+                        ws->send(R"({"type":"error","message":"game no longer active"})",
+                            uWS::OpCode::TEXT);
+                        ws->close();
+                        return;
+                      }
+
+                      // slot the new socket into the room, replacing the dead one
+                      auto& room = it->second;
+                      auto* data = ws->getUserData();
+                      data->game_id = resolved.match_id;
+                      data->user_id = resolved.user_id;
+                      data->color = resolved.color;
+
+                      if (resolved.color == "white")
+                        room.white = ws;
+                      else
+                        room.black = ws;
+
+                      // issue a fresh token — the old one was consumed by resolveResumeToken
+                      std::string new_token = grpc_client_.createResumeToken(resolved.match_id,
+                          resolved.user_id,
+                          resolved.color);
+
+                      // catch the client up: current board position + full move history
+                      nlohmann::json response = { { "type", "resumed" },
+                        { "color", resolved.color },
+                        { "fen", room.board.getFen() },
+                        { "moves", room.move_history },
+                        { "resume_token", new_token } };
+                      ws->send(response.dump(), uWS::OpCode::TEXT);
+
+                      // let the other player know their opponent is back
+                      nlohmann::json reconnected = { { "type", "opponent_reconnected" } };
+                      broadcastToRoom(room, reconnected.dump());
 
                     } else {
                       ws->send(R"({"type":"error","message":"unknown message type"})",

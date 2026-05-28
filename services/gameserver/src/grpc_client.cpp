@@ -45,3 +45,35 @@ bool GrpcClient::reportGameEnd(const std::string& match_id,
   }
   return response.acknowledged();
 }
+
+std::string GrpcClient::createResumeToken(const std::string& match_id,
+    const std::string& user_id,
+    const std::string& color) {
+  gamecontrol::ResumeTokenRequest request;
+  request.set_match_id(match_id);
+  request.set_user_id(user_id);
+  request.set_color(color);
+
+  gamecontrol::ResumeTokenResponse response;
+  grpc::ClientContext context;
+  grpc::Status status = stub_->CreateResumeToken(&context, request, &response);
+
+  if (!status.ok()) {
+    return "";
+  }
+  return response.token();
+}
+
+ResolveResult GrpcClient::resolveResumeToken(const std::string& token) {
+  gamecontrol::ResolveTokenRequest request;
+  request.set_token(token);
+
+  gamecontrol::ResolveTokenResponse response;
+  grpc::ClientContext context;
+  grpc::Status status = stub_->ResolveResumeToken(&context, request, &response);
+
+  if (!status.ok() || !response.valid()) {
+    return { false, "", "", "" };
+  }
+  return { true, response.match_id(), response.user_id(), response.color() };
+}
