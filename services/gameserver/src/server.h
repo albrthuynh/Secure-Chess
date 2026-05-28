@@ -12,6 +12,10 @@ struct PerSocketData {
   std::string username;
   std::string game_id;
   std::string color; // "white" or "black"
+
+  // rate limiting: fixed window per connection
+  int msg_count = 0;
+  long long window_start_ms = 0; // epoch milliseconds when the current window opened
 };
 
 // Type alias so we don't have to write this mouthful everywhere.

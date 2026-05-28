@@ -44,8 +44,8 @@ refresh_time: int,
 
 ### Week 5: Reliability + security hardening
 
-- [ ] Reconnect/resume (session token or resume ticket)
-- [ ] Per-connection and per-user WS rate limits + message size limits
+- [x] Reconnect/resume (session token or resume ticket)
+- [x] Per-connection and per-user WS rate limits + message size limits
 - [ ] Append-only audit events (login, match start/end, bans)
 - [ ] Deliverable: feels production-ish, not fragile.
 

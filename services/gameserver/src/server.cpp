@@ -1,6 +1,11 @@
 #include "server.h"
+#include <chrono> // C++ standard library for time — we use it to get the current timestamp in ms
 #include <iostream>
 #include <nlohmann/json.hpp>
+
+static constexpr size_t MAX_MESSAGE_BYTES = 1024; // 1 KB — chess moves are tiny
+static constexpr int RATE_LIMIT_MAX = 10;         // messages per window
+static constexpr long long RATE_WINDOW_MS = 1000; // 1 second window
 
 Server::Server(const Config& config) : config_(config), grpc_client_(config.grpc_address) {
 }
@@ -25,6 +30,34 @@ void Server::run() {
                   },
               .message =
                   [this](auto* ws, std::string_view msg, uWS::OpCode opCode) {
+                    // --- message size limit ---
+                    // reject before we even try to parse, so a huge payload can't burn CPU
+                    if (msg.size() > MAX_MESSAGE_BYTES) {
+                      ws->send(R"({"type":"error","message":"message too large"})",
+                          uWS::OpCode::TEXT);
+                      return;
+                    }
+
+                    // --- per-connection rate limit (fixed window) ---
+                    // same idea as the HTTP rate limiter, but tracked in-memory per socket
+                    auto* data = ws->getUserData();
+                    long long now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                        std::chrono::steady_clock::now().time_since_epoch())
+                                           .count();
+
+                    if (now_ms - data->window_start_ms > RATE_WINDOW_MS) {
+                      // we've crossed into a new 1-second window — reset the counter
+                      data->window_start_ms = now_ms;
+                      data->msg_count = 0;
+                    }
+
+                    data->msg_count++;
+                    if (data->msg_count > RATE_LIMIT_MAX) {
+                      ws->send(R"({"type":"error","message":"rate limit exceeded"})",
+                          uWS::OpCode::TEXT);
+                      return;
+                    }
+
                     auto json = nlohmann::json::parse(msg, nullptr, false);
                     if (json.is_discarded()) {
                       ws->send(R"({"type":"error","message":"invalid json"})", uWS::OpCode::TEXT);
@@ -46,7 +79,6 @@ void Server::run() {
                         return;
                       }
 
-                      auto* data = ws->getUserData();
                       data->game_id = verified.match_id; // trust the server, not the client
                       data->user_id = verified.player_id;
                       data->color = color;
@@ -73,7 +105,6 @@ void Server::run() {
                       ws->send(response.dump(), uWS::OpCode::TEXT);
 
                     } else if (type == "move") {
-                      auto* data = ws->getUserData();
                       auto it = rooms_.find(data->game_id);
                       if (it == rooms_.end())
                         return;
@@ -211,7 +242,6 @@ void Server::run() {
 
                       // slot the new socket into the room, replacing the dead one
                       auto& room = it->second;
-                      auto* data = ws->getUserData();
                       data->game_id = resolved.match_id;
                       data->user_id = resolved.user_id;
                       data->color = resolved.color;
