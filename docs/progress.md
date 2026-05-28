@@ -51,8 +51,8 @@ refresh_time: int,
 
 ### Week 6: Observability + load test (resume gold)
 **Prometheus metrics**
-- [ ] connected sockets, active games
-- [ ] move latency (histogram), error counts
+- [x] connected sockets, active games
+- [x] move latency (histogram), error counts
 
 **Grafana dashboard**
 - [ ] Load test: k6 (or a simple custom harness)
