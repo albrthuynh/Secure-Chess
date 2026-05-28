@@ -7,7 +7,45 @@ static constexpr size_t MAX_MESSAGE_BYTES = 1024; // 1 KB — chess moves are ti
 static constexpr int RATE_LIMIT_MAX = 10;         // messages per window
 static constexpr long long RATE_WINDOW_MS = 1000; // 1 second window
 
-Server::Server(const Config& config) : config_(config), grpc_client_(config.grpc_address) {
+Server::Server(const Config& config)
+    : config_(config), grpc_client_(config.grpc_address), exposer_("0.0.0.0:9002") {
+  // create the registry for prometheus
+  registry_ = std::make_shared<prometheus::Registry>();
+
+  // link exposer to registry - so it knows where the metrics are scraped from
+  exposer_.RegisterCollectable(registry_);
+
+  // So we register each metric into the registry
+  connected_sockets_ = &prometheus::BuildGauge()
+                            .Name("chess_connected_sockets")
+                            .Help("Number of currently connected WebSocket clients")
+                            .Register(*registry_)
+                            .Add({});
+
+  active_games_ = &prometheus::BuildGauge()
+                       .Name("chess_active_games")
+                       .Help("Number of active game rooms")
+                       .Register(*registry_)
+                       .Add({});
+
+  moves_total_ = &prometheus::BuildCounter()
+                      .Name("chess_moves_total")
+                      .Help("Total number of valid moves processed")
+                      .Register(*registry_)
+                      .Add({});
+
+  move_duration_ =
+      &prometheus::BuildHistogram()
+           .Name("chess_move_duration_seconds")
+           .Help("Time to validate and broadcast a move in seconds")
+           .Register(*registry_)
+           .Add({},
+               prometheus::Histogram::BucketBoundaries{ 0.001, 0.005, 0.01, 0.025, 0.05, 0.1 });
+
+  errors_family_ = &prometheus::BuildCounter()
+                        .Name("chess_errors_total")
+                        .Help("Total WebSocket errors by reason")
+                        .Register(*registry_);
 }
 
 // Helper so we don't repeat the null-check pattern every time we want to tell both players
@@ -25,14 +63,16 @@ void Server::run() {
   uWS::App()
       .ws<PerSocketData>("/ws",
           { .open =
-                  [](auto* ws) {
+                  [this](auto* ws) {
                     std::cout << "client connected!" << std::endl;
+                    connected_sockets_->Increment();
                   },
               .message =
                   [this](auto* ws, std::string_view msg, uWS::OpCode opCode) {
                     // --- message size limit ---
                     // reject before we even try to parse, so a huge payload can't burn CPU
                     if (msg.size() > MAX_MESSAGE_BYTES) {
+                      errors_family_->Add({ { "reason", "message_too_large" } }).Increment();
                       ws->send(R"({"type":"error","message":"message too large"})",
                           uWS::OpCode::TEXT);
                       return;
@@ -53,6 +93,7 @@ void Server::run() {
 
                     data->msg_count++;
                     if (data->msg_count > RATE_LIMIT_MAX) {
+                      errors_family_->Add({ { "reason", "rate_limit_exceeded" } }).Increment();
                       ws->send(R"({"type":"error","message":"rate limit exceeded"})",
                           uWS::OpCode::TEXT);
                       return;
@@ -60,6 +101,7 @@ void Server::run() {
 
                     auto json = nlohmann::json::parse(msg, nullptr, false);
                     if (json.is_discarded()) {
+                      errors_family_->Add({ { "reason", "invalid_json" } }).Increment();
                       ws->send(R"({"type":"error","message":"invalid json"})", uWS::OpCode::TEXT);
                       return;
                     }
@@ -73,6 +115,7 @@ void Server::run() {
                       // verify the ticket with Python before allowing the player into the room
                       VerifyResult verified = grpc_client_.verifyMatchTicket(ticket);
                       if (!verified.valid) {
+                        errors_family_->Add({ { "reason", "invalid_ticket" } }).Increment();
                         ws->send(R"({"type":"error","message":"invalid ticket"})",
                             uWS::OpCode::TEXT);
                         ws->close();
@@ -85,12 +128,15 @@ void Server::run() {
 
                       // creates the room if it doesn't exist yet, then assigns this socket to the
                       // correct color slot
+                      bool is_new_room = rooms_.count(verified.match_id) == 0;
                       auto& room = rooms_[verified.match_id];
                       if (color == "white") {
                         room.white = ws;
                       } else {
                         room.black = ws;
                       }
+                      if (is_new_room)
+                        active_games_->Increment();
 
                       // send back the starting FEN and a resume token
                       // the client holds onto the token and presents it if they reconnect
@@ -118,6 +164,7 @@ void Server::run() {
                       bool white_to_move = (board.sideToMove() == chess::Color::WHITE);
                       bool sender_is_white = (data->color == "white");
                       if (white_to_move != sender_is_white) {
+                        errors_family_->Add({ { "reason", "not_your_turn" } }).Increment();
                         ws->send(R"({"type":"error","message":"not your turn"})",
                             uWS::OpCode::TEXT);
                         return;
@@ -146,6 +193,7 @@ void Server::run() {
                       }
 
                       if (!is_legal) {
+                        errors_family_->Add({ { "reason", "illegal_move" } }).Increment();
                         ws->send(R"({"type":"error","message":"illegal move"})", uWS::OpCode::TEXT);
                         return;
                       }
@@ -153,8 +201,10 @@ void Server::run() {
                       // --- apply and broadcast ---
                       // Only reach here if the move passed all checks. Now we commit it to the
                       // board.
+                      auto move_start = std::chrono::steady_clock::now();
                       board.makeMove(move);
                       room.move_history.push_back(move_str);
+                      moves_total_->Increment();
 
                       // After applying, getFen() returns the new position. We send this to both
                       // players so their boards stay perfectly in sync with the server's truth.
@@ -163,6 +213,11 @@ void Server::run() {
                         { "fen", board.getFen() },
                         { "turn", board.sideToMove() == chess::Color::WHITE ? "white" : "black" } };
                       broadcastToRoom(room, broadcast.dump());
+
+                      double move_elapsed = std::chrono::duration<double>(
+                          std::chrono::steady_clock::now() - move_start)
+                                                .count();
+                      move_duration_->Observe(move_elapsed);
 
                       // --- game over detection ---
                       // isGameOver() returns a pair: the reason (checkmate, stalemate, etc.)
@@ -226,6 +281,7 @@ void Server::run() {
 
                       ResolveResult resolved = grpc_client_.resolveResumeToken(token);
                       if (!resolved.valid) {
+                        errors_family_->Add({ { "reason", "invalid_resume_token" } }).Increment();
                         ws->send(R"({"type":"error","message":"invalid resume token"})",
                             uWS::OpCode::TEXT);
                         ws->close();
@@ -234,6 +290,7 @@ void Server::run() {
 
                       auto it = rooms_.find(resolved.match_id);
                       if (it == rooms_.end()) {
+                        errors_family_->Add({ { "reason", "game_no_longer_active" } }).Increment();
                         ws->send(R"({"type":"error","message":"game no longer active"})",
                             uWS::OpCode::TEXT);
                         ws->close();
@@ -269,6 +326,7 @@ void Server::run() {
                       broadcastToRoom(room, reconnected.dump());
 
                     } else {
+                      errors_family_->Add({ { "reason", "unknown_message_type" } }).Increment();
                       ws->send(R"({"type":"error","message":"unknown message type"})",
                           uWS::OpCode::TEXT);
                     }
@@ -296,8 +354,10 @@ void Server::run() {
                     // clean up once both sockets are gone
                     if (!room.white && !room.black) {
                       rooms_.erase(it);
+                      active_games_->Decrement();
                     }
 
+                    connected_sockets_->Decrement();
                     std::cout << "Client disconnected (" << code << ")" << std::endl;
                   } })
       .listen(config_.port,
