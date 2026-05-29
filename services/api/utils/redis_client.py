@@ -19,7 +19,7 @@ async def get_redis_client() -> Redis:
             raise ValueError("redis_url is not found")
 
         _redis_client = Redis.from_url(
-            redis_url, encoding="utf-8", decode_responses=True, max_connections=10
+            redis_url, encoding="utf-8", decode_responses=True, max_connections=50
         )
 
         if _redis_client is None:

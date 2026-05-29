@@ -65,4 +65,52 @@ Tests Failed: 0
 docker exec secure_chess_redis redis-cli -a [YOUR_PASSWORD] EVAL "return redis.call('del', unpack(redis.call('keys', 'rate_limit:*')))" 0
 ```
 
+---
+
+
+### Move Handling Latency Load Test (`latency_load_test.py`)
+
+Spins up N concurrent chess games and measures round-trip WebSocket latency for each move — from when the client sends the move to when both players have received the broadcast. Reports p50/p95/p99.
+
+**What it measures:**
+- Round-trip move latency: WebSocket send → C++ move validation → broadcast received by both players
+- Runs N games fully concurrently via `asyncio` to simulate real load
+- Each game plays 10 moves (Ruy Lopez opening) — all legal, alternating white/black
+
+**Prerequisites:**
+- All Docker containers must be running (`docker compose up -d`)
+- Install test dependencies (separate from the main service requirements):
+```bash
+pip install -r loadtests/requirements.txt
+```
+
+**Usage:**
+```bash
+python3 loadtests/latency_load_test.py
+```
+
+To increase load, edit `N_GAMES` at the top of the script.
+
+**Expected output:**
+```
+secure-chess — move handling latency load test
+  concurrent games : 10
+  moves per game   : 10
+  total moves      : 100
+
+  games completed  : 10/10
+  moves measured   : 100
+  total test time  : 3.2s
+
+move handling latency  (WebSocket send → broadcast received)
+  p50  :  1.84 ms
+  p95  :  4.21 ms
+  p99  :  7.63 ms
+  min  :  0.91 ms
+  max  :  9.12 ms
+  mean :  2.10 ms
+```
+
+**Note:** Numbers will be green (< 10ms), yellow (< 50ms), or red (≥ 50ms) in the terminal output. On a local Docker setup you should see green across the board. The p99 under concurrent load is the key number — it tells you the worst-case experience any player would have during peak usage.
+
 
