@@ -56,15 +56,14 @@ refresh_time: int,
 
 **Grafana dashboard**
 - [x] Dashboard set up, set up grafana dashboard
-- [ ] Load test: k6 (or a simple custom harness)
+- [x] Load test: k6 (or a simple custom harness)
 
-- [ ] Deliverable: perf report: p50/p95/p99 move handling latency under load.
+- [x] Deliverable: perf report: p50/p95/p99 move handling latency under load.
 
 ### Week 7: Polish + portfolio packaging
 
 Threat model doc
 
-- [ ] Architecture diagram
-- [ ] “How to run locally” + “Design decisions” section
-- [ ] Record a 60–90s demo video
+- [x] Architecture diagram
+- [x] “How to run locally” + “Design decisions” section
 Deliverable: finished portfolio-grade repo.
