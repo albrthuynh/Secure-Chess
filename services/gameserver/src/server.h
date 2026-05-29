@@ -3,18 +3,24 @@
 #include "chess.hpp"
 #include "config.h"
 #include "grpc_client.h"
+#include <condition_variable>
+#include <functional>
 #include <memory>
+#include <mutex>
 #include <prometheus/counter.h>
 #include <prometheus/exposer.h>
 #include <prometheus/family.h>
 #include <prometheus/gauge.h>
 #include <prometheus/histogram.h>
 #include <prometheus/registry.h>
+#include <queue>
 #include <string>
+#include <thread>
 #include <unordered_map>
 #include <vector>
 
 struct PerSocketData {
+  size_t socket_id = 0;
   std::string user_id;
   std::string username;
   std::string game_id;
@@ -39,25 +45,39 @@ struct MatchRoom {
 class Server {
 public:
   explicit Server(const Config& config);
+  ~Server();
   void run();
 
 private:
   Config config_;
-  GrpcClient grpc_client_;
   std::unordered_map<std::string, MatchRoom> rooms_;
+  std::unordered_map<size_t, WsSocket*> sockets_;
+  size_t next_socket_id_ = 1;
 
-  // observability — exposer serves /metrics on port 9002, registry owns all metric objects
+  std::vector<std::thread> grpc_workers_;
+  std::queue<std::function<void(GrpcClient&)>> grpc_jobs_;
+  std::mutex grpc_jobs_mutex_;
+  std::condition_variable grpc_jobs_cv_;
+  bool stopping_grpc_workers_ = false;
+
+  // observability — exposer serves /metrics on port 9002, registry owns all
+  // metric objects
   prometheus::Exposer exposer_;
   std::shared_ptr<prometheus::Registry> registry_;
 
-  // raw pointers into the registry — the registry owns the memory, we just hold references
+  // raw pointers into the registry — the registry owns the memory, we just hold
+  // references
   prometheus::Gauge* connected_sockets_; // goes up/down as players connect/disconnect
   prometheus::Gauge* active_games_;      // goes up/down as rooms are created/destroyed
   prometheus::Counter* moves_total_;     // only ever increases — total valid moves processed
   prometheus::Histogram* move_duration_; // records how long each move takes — gives us p50/p95/p99
-  // Family lets us use one counter with a "reason" label instead of 9 separate counters
+  // Family lets us use one counter with a "reason" label instead of 9 separate
+  // counters
   prometheus::Family<prometheus::Counter>* errors_family_;
 
   // sends msg to whichever players are currently connected in the room
   void broadcastToRoom(MatchRoom& room, const std::string& msg);
+  void startGrpcWorkers();
+  void stopGrpcWorkers();
+  void enqueueGrpcJob(std::function<void(GrpcClient&)> job);
 };

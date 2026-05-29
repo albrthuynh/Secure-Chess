@@ -45,7 +45,7 @@ async def health():
 
 @router.post("/sign-up", status_code=201)
 @rate_limit(
-    max_requests=50, window_seconds=3600, identifier_type="ip", key_prefix="sign-up"
+    max_requests=5000, window_seconds=3600, identifier_type="ip", key_prefix="sign-up"
 )
 async def signup(body: SignupBody, request: Request):
     # make sure there is a password policy here
@@ -87,7 +87,7 @@ async def signup(body: SignupBody, request: Request):
 
 @router.post("/sign-in", status_code=200)
 @rate_limit(
-    max_requests=50, window_seconds=900, identifier_type="ip", key_prefix="sign-in"
+    max_requests=5000, window_seconds=900, identifier_type="ip", key_prefix="sign-in"
 )
 async def signin(body: SignInBody, request: Request):
     if not body.username or not body.password:

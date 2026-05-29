@@ -28,7 +28,7 @@ Validates that the API rate limiting is working correctly for authentication end
 API_URL=http://localhost:8080 ./loadtests/test_rate_limiting.sh
 ```
 
-**Expected output:**
+**Example recent output:**
 ```
 ========================================
   Rate Limiting Test Suite
@@ -70,12 +70,16 @@ docker exec secure_chess_redis redis-cli -a [YOUR_PASSWORD] EVAL "return redis.c
 
 ### Move Handling Latency Load Test (`latency_load_test.py`)
 
-Spins up N concurrent chess games and measures round-trip WebSocket latency for each move — from when the client sends the move to when both players have received the broadcast. Reports p50/p95/p99.
+Spins up N total chess games with bounded concurrency and measures round-trip WebSocket latency for each move — from when the client sends the move to when both players have received the broadcast. Reports p50/p95/p99.
 
 **What it measures:**
 - Round-trip move latency: WebSocket send → C++ move validation → broadcast received by both players
-- Runs N games fully concurrently via `asyncio` to simulate real load
-- Each game plays 10 moves (Ruy Lopez opening) — all legal, alternating white/black
+- Runs N games with bounded `asyncio` concurrency to simulate real load
+- Clears stale API `rate_limit:*` Redis keys before starting
+- Throttles account creation/sign-in/matchmaking setup separately from gameplay
+- Staggers WebSocket joins so the local game server is not flooded by handshakes
+- Adds a short delay between half-moves so the test stays under the WebSocket rate limit
+- Each game plays 37 moves (Ruy Lopez opening line) — all legal, alternating white/black
 
 **Prerequisites:**
 - All Docker containers must be running (`docker compose up -d`)
@@ -89,28 +93,33 @@ pip install -r loadtests/requirements.txt
 python3 loadtests/latency_load_test.py
 ```
 
-To increase load, edit `N_GAMES` at the top of the script.
+To increase load, edit `N_GAMES` or `CONCURRENCY` at the top of the script.
 
-**Expected output:**
+**Example recent output:**
 ```
-secure-chess — move handling latency load test
-  concurrent games : 10
-  moves per game   : 10
-  total moves      : 100
+cleared rate limits: 0 keys
 
-  games completed  : 10/10
-  moves measured   : 100
-  total test time  : 3.2s
+secure-chess — move handling latency load test
+  total games      : 100
+  concurrency      : 50
+  setup concurrency: 5
+  join concurrency : 1
+  move delay       : 0.12s
+  join timeout     : 30s
+  moves per game   : 37
+  total moves      : 3700
+
+  games completed  : 100/100
+  moves measured   : 3700
+  total test time  : 115.5s
 
 move handling latency  (WebSocket send → broadcast received)
-  p50  :  1.84 ms
-  p95  :  4.21 ms
-  p99  :  7.63 ms
-  min  :  0.91 ms
-  max  :  9.12 ms
-  mean :  2.10 ms
+  p50  :  1.20 ms
+  p95  :  5.06 ms
+  p99  :  7.09 ms
+  min  :  0.38 ms
+  max  :  13.96 ms
+  mean :  1.79 ms
 ```
 
 **Note:** Numbers will be green (< 10ms), yellow (< 50ms), or red (≥ 50ms) in the terminal output. On a local Docker setup you should see green across the board. The p99 under concurrent load is the key number — it tells you the worst-case experience any player would have during peak usage.
-
-

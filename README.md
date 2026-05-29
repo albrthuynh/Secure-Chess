@@ -56,17 +56,18 @@ FastAPI is auto-instrumented via `prometheus-fastapi-instrumentator`. The C++ ga
 
 ## Performance Results
 
-Load test: 10 concurrent games, 10 moves each (100 total moves), measured end-to-end from WebSocket send to broadcast receipt by both players.
+Load test: 100 total games, up to 50 games in flight, 37 moves each (3,700 total moves), measured end-to-end from WebSocket send to broadcast receipt by both players.
 
 | Metric | Result |
 |---|---|
-| p50 | 1.76 ms |
-| p95 | 8.00 ms |
-| p99 | 12.40 ms |
-| min | 0.73 ms |
-| max | 12.60 ms |
-| mean | 2.49 ms |
-| Games completed | 10 / 10 |
+| p50 | 1.20 ms |
+| p95 | 5.06 ms |
+| p99 | 7.09 ms |
+| min | 0.38 ms |
+| max | 13.96 ms |
+| mean | 1.79 ms |
+| Games completed | 100 / 100 |
+| Moves measured | 3,700 / 3,700 |
 
 See `loadtests/` for how to reproduce these numbers.
 
