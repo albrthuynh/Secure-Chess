@@ -55,6 +55,7 @@ refresh_time: int,
 - [x] move latency (histogram), error counts
 
 **Grafana dashboard**
+- [x] Dashboard set up, set up grafana dashboard
 - [ ] Load test: k6 (or a simple custom harness)
 
 - [ ] Deliverable: perf report: p50/p95/p99 move handling latency under load.
